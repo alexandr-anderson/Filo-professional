@@ -9,6 +9,7 @@ export const products = [
     description:
       'Профессиональный редуктор объёма с экстрактом бразильского кофе. Разглаживает и укрощает непослушные волосы, сохраняя естественный объём.',
     line: 'Redutor de Volume',
+    image: '/images/products/cafe-brasil.png',
   },
   {
     id: 'bio-btx-reducer',
@@ -20,6 +21,7 @@ export const products = [
     description:
       'Биотехнологичный редуктор объёма с наночастицами. Глубокое восстановление структуры волоса с эффектом ботокса.',
     line: 'Redutor de Volume',
+    image: '/images/products/bio-btx-reducer.png',
   },
   {
     id: 'nano-btx-platinum',
@@ -31,6 +33,7 @@ export const products = [
     description:
       'Премиальная нано-формула для интенсивного восстановления повреждённых волос. Платиновый комплекс для максимального блеска.',
     line: 'Tratamento',
+    image: '/images/products/nano-btx-platinum.jpg',
   },
   {
     id: 'splendor-oil',
@@ -42,6 +45,7 @@ export const products = [
     description:
       'Масло-финишер с натуральными маслами Амазонии. Придаёт блеск, защищает от УФ и термического воздействия.',
     line: 'Finalizadores',
+    image: '/images/products/splendor-oil.png',
   },
   {
     id: 'kit-hydrat-therapy',
@@ -53,6 +57,7 @@ export const products = [
     description:
       'Домашний набор для глубокого увлажнения: шампунь, кондиционер и маска. Формула с экстрактами тропических растений.',
     line: 'Home Care',
+    image: '/images/products/kit-hydrat-therapy.png',
   },
 ];
 
@@ -73,10 +78,36 @@ export const features = [
 ];
 
 export const productLines = [
-  { id: 'volume', title: 'Редуктор объёма', href: '/catalog.html?cat=volume' },
-  { id: 'treatment', title: 'Лечение', href: '/catalog.html?cat=treatment' },
-  { id: 'homecare', title: 'Home Care', href: '/catalog.html?cat=homecare' },
-  { id: 'finisher', title: 'Финиш', href: '/catalog.html?cat=finisher' },
+  {
+    id: 'volume',
+    title: 'Редуктор объёма',
+    href: '/catalog.html?cat=volume',
+    image: '/images/categories/volume.png',
+  },
+  {
+    id: 'treatment',
+    title: 'Лечение',
+    href: '/catalog.html?cat=treatment',
+    image: '/images/categories/treatment.png',
+  },
+  {
+    id: 'homecare',
+    title: 'Home Care',
+    href: '/catalog.html?cat=homecare',
+    image: '/images/categories/homecare.png',
+  },
+  {
+    id: 'finisher',
+    title: 'Финиш',
+    href: '/catalog.html?cat=finisher',
+    image: '/images/categories/finisher.png',
+  },
+];
+
+export const trustItems = [
+  { icon: '🚚', title: 'Доставка по РФ', text: 'СДЭК, Почта, Boxberry' },
+  { icon: '↩️', title: 'Консультация', text: 'Поможем с подбором' },
+  { icon: '🔒', title: 'Безопасная оплата', text: 'После подтверждения заказа' },
 ];
 
 export function formatPrice(price) {

@@ -11,26 +11,30 @@
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="catalog">
+  <div class="top-bar" id="topBar"></div>
   <header class="header"></header>
 
   <main>
-    <div class="page-header">
+    <div class="catalog-header">
       <div class="container">
-        <h1 class="page-header__title">Каталог</h1>
-        <p class="page-header__text">Профессиональная косметика FILO для салонов и домашнего ухода</p>
+        <h1 class="catalog-header__title">Каталог</h1>
+        <p class="catalog-header__text">Профессиональная косметика FILO для салонов и домашнего ухода</p>
       </div>
     </div>
 
-    <section class="section">
+    <section class="section section--catalog">
       <div class="container">
-        <div class="filter-tabs" id="filterTabs">
-          <button class="filter-tab" data-cat="all">Все товары</button>
-          <button class="filter-tab" data-cat="volume">Редуктор объёма</button>
-          <button class="filter-tab" data-cat="treatment">Лечение</button>
-          <button class="filter-tab" data-cat="homecare">Home Care</button>
-          <button class="filter-tab" data-cat="finisher">Финиш</button>
+        <div class="catalog-toolbar">
+          <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab" data-cat="all">Все товары</button>
+            <button class="filter-tab" data-cat="volume">Редуктор объёма</button>
+            <button class="filter-tab" data-cat="treatment">Лечение</button>
+            <button class="filter-tab" data-cat="homecare">Home Care</button>
+            <button class="filter-tab" data-cat="finisher">Финиш</button>
+          </div>
+          <span class="catalog-toolbar__count" id="catalogCount"></span>
         </div>
-        <div class="products-grid" id="catalogProducts"></div>
+        <div class="products-grid products-grid--catalog" id="catalogProducts"></div>
       </div>
     </section>
   </main>
