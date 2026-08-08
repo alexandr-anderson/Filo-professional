@@ -4,11 +4,12 @@ import {
   productLines,
   trustItems,
   formatPrice,
+  PRICE_LABEL,
 } from '../data/products.js';
+import { TELEGRAM_USERNAME, BRAND_NAME } from '../data/config.js';
 import {
   getCart,
   getCartCount,
-  getCartTotal,
   addToCart,
   removeFromCart,
   updateQty,
@@ -61,7 +62,7 @@ function renderHeader() {
 
   header.innerHTML = `
     <div class="container header__inner">
-      <a href="/" class="logo">FIL<span>O</span></a>
+      <a href="/" class="logo">FILO <span>Professional</span></a>
       <nav class="nav" id="nav">
         ${navLinks
           .map(
@@ -95,9 +96,9 @@ function renderFooter() {
     <div class="container">
       <div class="footer__grid">
         <div>
-          <div class="footer__brand">FIL<span>O</span> Professional</div>
+          <div class="footer__brand">FILO <span>Professional</span></div>
           <p class="footer__desc">
-            Официальный дистрибьютор профессиональной косметики FILO в России.
+            Официальный дистрибьютор профессиональной косметики ${BRAND_NAME} в России.
             Санкт-Петербург · Доставка по всей России.
           </p>
         </div>
@@ -120,7 +121,7 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer__bottom">
-        <span>© ${new Date().getFullYear()} FILO Russia. Официальный дистрибьютор.</span>
+        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia. Официальный дистрибьютор.</span>
         <span>filoprofessional.com.br</span>
       </div>
     </div>
@@ -260,7 +261,6 @@ function hideCheckout() {
 function updateCartUI() {
   const cart = getCart();
   const count = getCartCount();
-  const total = getCartTotal(products);
 
   const countEl = document.querySelector('.cart-btn__count');
   if (countEl) {
@@ -269,7 +269,7 @@ function updateCartUI() {
   }
 
   const totalEl = document.getElementById('cartTotal');
-  if (totalEl) totalEl.textContent = formatPrice(total);
+  if (totalEl) totalEl.textContent = PRICE_LABEL;
 
   const itemsEl = document.getElementById('cartItems');
   if (!itemsEl) return;
@@ -296,7 +296,7 @@ function updateCartUI() {
           </div>
           <div class="cart-item__info">
             <div class="cart-item__name">${product.name}</div>
-            <div class="cart-item__price">${formatPrice(product.price)}</div>
+            <div class="cart-item__price">${formatPrice()}</div>
             <div class="cart-item__qty">
               <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}">−</button>
               <span class="cart-item__qty-value">${item.qty}</span>
@@ -328,18 +328,16 @@ function buildOrderMessage(formData) {
   const cart = getCart();
   const lines = cart.map((item) => {
     const product = products.find((p) => p.id === item.id);
-    return `• ${product.name} × ${item.qty} — ${formatPrice(product.price * item.qty)}`;
+    return `• ${product.name} × ${item.qty}`;
   });
 
-  const total = getCartTotal(products);
-
   return [
-    '🛍 Новый заказ FILO',
+    '🛍 Новый заказ FILO Professional',
     '',
     '📦 Товары:',
     ...lines,
     '',
-    `💰 Итого: ${formatPrice(total)}`,
+    '💰 Стоимость: уточняется при оформлении',
     '',
     '👤 Клиент:',
     `Имя: ${formData.name}`,
@@ -380,41 +378,19 @@ async function handleOrderSubmit(e) {
 
   const orderMessage = buildOrderMessage(formData);
 
-  try {
-    const response = await fetch('/api/send-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: orderMessage, formData }),
-    });
-
-    if (response.ok) {
-      clearCart();
-      updateCartUI();
-      messageEl.className = 'form-message form-message--success';
-      messageEl.textContent = 'Заказ отправлен! Мы свяжемся с вами в Telegram.';
-      form.reset();
-      showToast('Заказ успешно отправлен!');
-      setTimeout(closeCart, 2500);
-    } else {
-      throw new Error('API error');
-    }
-  } catch {
-    const telegramUsername = import.meta.env.VITE_TELEGRAM_USERNAME || '';
-    if (telegramUsername) {
-      const url = `https://t.me/${telegramUsername}?text=${encodeURIComponent(orderMessage)}`;
-      window.open(url, '_blank');
-      clearCart();
-      updateCartUI();
-      messageEl.className = 'form-message form-message--success';
-      messageEl.textContent = 'Откроется Telegram — нажмите «Отправить» для завершения заказа.';
-      form.reset();
-      showToast('Переход в Telegram...');
-      setTimeout(closeCart, 2500);
-    } else {
-      messageEl.className = 'form-message form-message--error';
-      messageEl.textContent =
-        'Не удалось отправить заказ автоматически. Напишите нам в Telegram вручную.';
-    }
+  if (TELEGRAM_USERNAME) {
+    const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(orderMessage)}`;
+    window.open(url, '_blank');
+    clearCart();
+    updateCartUI();
+    messageEl.className = 'form-message form-message--success';
+    messageEl.textContent = 'Откроется Telegram — нажмите «Отправить» для завершения заказа.';
+    form.reset();
+    showToast('Переход в Telegram...');
+    setTimeout(closeCart, 2500);
+  } else {
+    messageEl.className = 'form-message form-message--error';
+    messageEl.textContent = 'Telegram не настроен. Напишите нам вручную.';
   }
 
   submitBtn.disabled = false;
@@ -440,7 +416,7 @@ export function renderProductCard(product, { compact = false } = {}) {
         <h3 class="product-card__name">${product.name}</h3>
         ${compact ? '' : `<p class="product-card__desc">${product.description}</p>`}
         <div class="product-card__meta">
-          <span class="product-card__price">${formatPrice(product.price)}</span>
+          <span class="product-card__price">${formatPrice()}</span>
           <span class="product-card__volume">${product.volume}</span>
         </div>
       </div>
