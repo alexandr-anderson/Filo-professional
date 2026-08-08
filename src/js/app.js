@@ -1,8 +1,15 @@
-import { products, formatPrice } from '../data/products.js';
+import {
+  products,
+  features,
+  productLines,
+  trustItems,
+  formatPrice,
+  PRICE_LABEL,
+} from '../data/products.js';
+import { TELEGRAM_USERNAME, BRAND_NAME } from '../data/config.js';
 import {
   getCart,
   getCartCount,
-  getCartTotal,
   addToCart,
   removeFromCart,
   updateQty,
@@ -12,6 +19,7 @@ import {
 const currentPage = document.body.dataset.page || 'home';
 
 export function initApp() {
+  renderTopBar();
   renderHeader();
   renderFooter();
   initCart();
@@ -19,6 +27,25 @@ export function initApp() {
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
+}
+
+function renderTopBar() {
+  const topBar = document.getElementById('topBar');
+  if (!topBar) return;
+
+  topBar.innerHTML = `
+    <div class="container top-bar__inner">
+      ${features
+        .map(
+          (f) => `
+        <div class="top-bar__item">
+          <span class="top-bar__icon">${f.icon}</span>
+          <span>${f.title}</span>
+        </div>`
+        )
+        .join('')}
+    </div>
+  `;
 }
 
 function renderHeader() {
@@ -35,7 +62,7 @@ function renderHeader() {
 
   header.innerHTML = `
     <div class="container header__inner">
-      <a href="/" class="logo">FIL<span>O</span></a>
+      <a href="/" class="logo">FILO <span>Professional</span></a>
       <nav class="nav" id="nav">
         ${navLinks
           .map(
@@ -46,7 +73,11 @@ function renderHeader() {
       </nav>
       <div class="header__actions">
         <button class="cart-btn" id="cartBtn" aria-label="Корзина">
-          🛒 Корзина
+          <svg class="cart-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/>
+            <path d="M3 6h18"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
           <span class="cart-btn__count" data-count="${count}">${count || ''}</span>
         </button>
         <button class="menu-toggle" id="menuToggle" aria-label="Меню">
@@ -65,9 +96,9 @@ function renderFooter() {
     <div class="container">
       <div class="footer__grid">
         <div>
-          <div class="footer__brand">FIL<span>O</span> Professional</div>
+          <div class="footer__brand">FILO <span>Professional</span></div>
           <p class="footer__desc">
-            Официальный дистрибьютор профессиональной косметики FILO в России.
+            Официальный дистрибьютор профессиональной косметики ${BRAND_NAME} в России.
             Санкт-Петербург · Доставка по всей России.
           </p>
         </div>
@@ -90,7 +121,7 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer__bottom">
-        <span>© ${new Date().getFullYear()} FILO Russia. Официальный дистрибьютор.</span>
+        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia. Официальный дистрибьютор.</span>
         <span>filoprofessional.com.br</span>
       </div>
     </div>
@@ -125,8 +156,7 @@ function initCart() {
 }
 
 function injectCartUI() {
-  const existing = document.getElementById('cartSidebar');
-  if (existing) return;
+  if (document.getElementById('cartSidebar')) return;
 
   const html = `
     <div class="cart-overlay" id="cartOverlay"></div>
@@ -221,14 +251,16 @@ function hideCheckout() {
   document.getElementById('cartItems')?.classList.remove('cart-items-view--hidden');
   document.getElementById('checkoutForm')?.classList.remove('checkout-form--active');
   document.getElementById('cartFooter').style.display = '';
-  document.getElementById('formMessage').className = 'form-message';
-  document.getElementById('formMessage').textContent = '';
+  const msg = document.getElementById('formMessage');
+  if (msg) {
+    msg.className = 'form-message';
+    msg.textContent = '';
+  }
 }
 
 function updateCartUI() {
   const cart = getCart();
   const count = getCartCount();
-  const total = getCartTotal(products);
 
   const countEl = document.querySelector('.cart-btn__count');
   if (countEl) {
@@ -237,7 +269,7 @@ function updateCartUI() {
   }
 
   const totalEl = document.getElementById('cartTotal');
-  if (totalEl) totalEl.textContent = formatPrice(total);
+  if (totalEl) totalEl.textContent = PRICE_LABEL;
 
   const itemsEl = document.getElementById('cartItems');
   if (!itemsEl) return;
@@ -259,9 +291,12 @@ function updateCartUI() {
       if (!product) return '';
       return `
         <div class="cart-item" data-id="${item.id}">
+          <div class="cart-item__image">
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+          </div>
           <div class="cart-item__info">
             <div class="cart-item__name">${product.name}</div>
-            <div class="cart-item__price">${formatPrice(product.price)}</div>
+            <div class="cart-item__price">${formatPrice()}</div>
             <div class="cart-item__qty">
               <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}">−</button>
               <span class="cart-item__qty-value">${item.qty}</span>
@@ -293,18 +328,16 @@ function buildOrderMessage(formData) {
   const cart = getCart();
   const lines = cart.map((item) => {
     const product = products.find((p) => p.id === item.id);
-    return `• ${product.name} × ${item.qty} — ${formatPrice(product.price * item.qty)}`;
+    return `• ${product.name} × ${item.qty}`;
   });
 
-  const total = getCartTotal(products);
-
   return [
-    '🛍 Новый заказ FILO',
+    '🛍 Новый заказ FILO Professional',
     '',
     '📦 Товары:',
     ...lines,
     '',
-    `💰 Итого: ${formatPrice(total)}`,
+    '💰 Стоимость: уточняется при оформлении',
     '',
     '👤 Клиент:',
     `Имя: ${formData.name}`,
@@ -345,42 +378,19 @@ async function handleOrderSubmit(e) {
 
   const orderMessage = buildOrderMessage(formData);
 
-  try {
-    const response = await fetch('/api/send-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: orderMessage, formData }),
-    });
-
-    if (response.ok) {
-      clearCart();
-      updateCartUI();
-      messageEl.className = 'form-message form-message--success';
-      messageEl.textContent = 'Заказ отправлен! Мы свяжемся с вами в Telegram.';
-      form.reset();
-      showToast('Заказ успешно отправлен!');
-      setTimeout(closeCart, 2500);
-    } else {
-      throw new Error('API error');
-    }
-  } catch {
-    // Fallback: открыть Telegram с готовым сообщением
-    const telegramUsername = import.meta.env.VITE_TELEGRAM_USERNAME || '';
-    if (telegramUsername) {
-      const url = `https://t.me/${telegramUsername}?text=${encodeURIComponent(orderMessage)}`;
-      window.open(url, '_blank');
-      clearCart();
-      updateCartUI();
-      messageEl.className = 'form-message form-message--success';
-      messageEl.textContent = 'Откроется Telegram — нажмите «Отправить» для завершения заказа.';
-      form.reset();
-      showToast('Переход в Telegram...');
-      setTimeout(closeCart, 2500);
-    } else {
-      messageEl.className = 'form-message form-message--error';
-      messageEl.textContent =
-        'Не удалось отправить заказ автоматически. Напишите нам в Telegram вручную.';
-    }
+  if (TELEGRAM_USERNAME) {
+    const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(orderMessage)}`;
+    window.open(url, '_blank');
+    clearCart();
+    updateCartUI();
+    messageEl.className = 'form-message form-message--success';
+    messageEl.textContent = 'Откроется Telegram — нажмите «Отправить» для завершения заказа.';
+    form.reset();
+    showToast('Переход в Telegram...');
+    setTimeout(closeCart, 2500);
+  } else {
+    messageEl.className = 'form-message form-message--error';
+    messageEl.textContent = 'Telegram не настроен. Напишите нам вручную.';
   }
 
   submitBtn.disabled = false;
@@ -395,26 +405,25 @@ export function showToast(text) {
   setTimeout(() => toast.classList.remove('toast--show'), 3000);
 }
 
-export function renderProductCard(product) {
+export function renderProductCard(product, { compact = false } = {}) {
   return `
-    <article class="product-card" data-category="${product.category}">
+    <article class="product-card ${compact ? 'product-card--compact' : ''}" data-category="${product.category}">
       <div class="product-card__image">
+        <img src="${product.image}" alt="${product.name}" loading="lazy">
         <span class="product-card__category">${product.categoryLabel}</span>
-        <div class="product-card__image-inner">${product.name}</div>
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        <p class="product-card__desc">${product.description}</p>
-        <div class="product-card__footer">
-          <div class="product-card__price">
-            ${formatPrice(product.price)}
-            <br><small>${product.volume}</small>
-          </div>
-          <button class="btn btn--primary btn--sm add-to-cart" data-id="${product.id}">
-            В корзину
-          </button>
+        ${compact ? '' : `<p class="product-card__desc">${product.description}</p>`}
+        <div class="product-card__meta">
+          <span class="product-card__price">${formatPrice()}</span>
+          <span class="product-card__volume">${product.volume}</span>
         </div>
       </div>
+      <button class="product-card__add add-to-cart" data-id="${product.id}" type="button">
+        <span>В корзину</span>
+        <span class="product-card__add-arrow">→</span>
+      </button>
     </article>
   `;
 }
@@ -429,18 +438,131 @@ function bindAddToCart(container) {
   });
 }
 
-function initHome() {
-  const grid = document.getElementById('featuredProducts');
-  if (grid) {
-    grid.innerHTML = products.slice(0, 4).map(renderProductCard).join('');
-    bindAddToCart(grid);
+function initHeroSlider() {
+  const track = document.getElementById('heroSliderTrack');
+  const dots = document.getElementById('heroSliderDots');
+  if (!track || !dots) return;
+
+  track.innerHTML = products
+    .map(
+      (p, i) => `
+    <div class="hero-slider__slide ${i === 0 ? 'hero-slider__slide--active' : ''}" data-index="${i}">
+      <div class="hero-slider__frame">
+        <img src="${p.image}" alt="${p.name}" loading="${i === 0 ? 'eager' : 'lazy'}">
+      </div>
+      <p class="hero-slider__caption">${p.name}</p>
+    </div>`
+    )
+    .join('');
+
+  dots.innerHTML = products
+    .map(
+      (_, i) =>
+        `<button class="hero-slider__dot ${i === 0 ? 'hero-slider__dot--active' : ''}" data-index="${i}" aria-label="Слайд ${i + 1}"></button>`
+    )
+    .join('');
+
+  let current = 0;
+  let timer;
+
+  function goTo(index) {
+    current = index;
+    track.querySelectorAll('.hero-slider__slide').forEach((slide, i) => {
+      slide.classList.toggle('hero-slider__slide--active', i === current);
+    });
+    dots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
+      dot.classList.toggle('hero-slider__dot--active', i === current);
+    });
   }
 
-  document.querySelectorAll('.line-card').forEach((card) => {
-    card.addEventListener('click', () => {
-      window.location.href = card.dataset.href;
+  function next() {
+    goTo((current + 1) % products.length);
+  }
+
+  dots.querySelectorAll('.hero-slider__dot').forEach((dot) => {
+    dot.addEventListener('click', () => {
+      goTo(Number(dot.dataset.index));
+      resetTimer();
     });
   });
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(next, 5000);
+  }
+
+  resetTimer();
+}
+
+function initCarousel() {
+  const track = document.getElementById('featuredProducts');
+  const prev = document.getElementById('carouselPrev');
+  const next = document.getElementById('carouselNext');
+  if (!track) return;
+
+  track.innerHTML = products.map((p) => renderProductCard(p, { compact: true })).join('');
+  bindAddToCart(track);
+
+  const scroll = (dir) => {
+    const amount = track.querySelector('.product-card')?.offsetWidth || 300;
+    track.parentElement.scrollBy({ left: dir * (amount + 24), behavior: 'smooth' });
+  };
+
+  prev?.addEventListener('click', () => scroll(-1));
+  next?.addEventListener('click', () => scroll(1));
+}
+
+function initHome() {
+  const heroFeatures = document.getElementById('heroFeatures');
+  if (heroFeatures) {
+    heroFeatures.innerHTML = features
+      .slice(0, 4)
+      .map(
+        (f) => `
+      <div class="hero__feature">
+        <span class="hero__feature-icon">${f.icon}</span>
+        <span>${f.title}</span>
+      </div>`
+      )
+      .join('');
+  }
+
+  const trustBar = document.getElementById('trustBar');
+  if (trustBar) {
+    trustBar.innerHTML = trustItems
+      .map(
+        (item) => `
+      <div class="trust-bar__item">
+        <span class="trust-bar__icon">${item.icon}</span>
+        <div>
+          <div class="trust-bar__title">${item.title}</div>
+          <div class="trust-bar__text">${item.text}</div>
+        </div>
+      </div>`
+      )
+      .join('');
+  }
+
+  const categoryGrid = document.getElementById('categoryGrid');
+  if (categoryGrid) {
+    categoryGrid.innerHTML = productLines
+      .map(
+        (line) => `
+      <a href="${line.href}" class="category-card">
+        <div class="category-card__image">
+          <img src="${line.image}" alt="${line.title}" loading="lazy">
+        </div>
+        <div class="category-card__body">
+          <h3 class="category-card__title">${line.title}</h3>
+          <span class="category-card__link">Смотреть →</span>
+        </div>
+      </a>`
+      )
+      .join('');
+  }
+
+  initHeroSlider();
+  initCarousel();
 }
 
 function initCatalog() {
@@ -448,7 +570,7 @@ function initCatalog() {
   const tabs = document.getElementById('filterTabs');
   if (!grid) return;
 
-  grid.innerHTML = products.map(renderProductCard).join('');
+  grid.innerHTML = products.map((p) => renderProductCard(p)).join('');
   bindAddToCart(grid);
 
   const params = new URLSearchParams(window.location.search);
@@ -469,8 +591,24 @@ function initCatalog() {
 }
 
 function filterProducts(category) {
+  let visible = 0;
   document.querySelectorAll('.product-card').forEach((card) => {
     const show = category === 'all' || card.dataset.category === category;
     card.style.display = show ? '' : 'none';
+    if (show) visible += 1;
   });
+
+  const countEl = document.getElementById('catalogCount');
+  if (countEl) {
+    countEl.textContent = `${visible} ${pluralProducts(visible)}`;
+  }
+}
+
+function pluralProducts(n) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 19) return 'товаров';
+  if (mod10 === 1) return 'товар';
+  if (mod10 >= 2 && mod10 <= 4) return 'товара';
+  return 'товаров';
 }

@@ -16,14 +16,6 @@ export function getCartCount() {
   return getCart().reduce((sum, item) => sum + item.qty, 0);
 }
 
-export function getCartTotal(products) {
-  const cart = getCart();
-  return cart.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.id);
-    return sum + (product ? product.price * item.qty : 0);
-  }, 0);
-}
-
 export function addToCart(productId) {
   const cart = getCart();
   const existing = cart.find((item) => item.id === productId);
