@@ -44,17 +44,23 @@ src/
 public/
 ```
 
-Пример обновления с GitHub:
+Пример обновления с GitHub (на сервере Timeweb):
 
 ```bash
-ssh u1234567@ssh.timeweb.ru
-cd ~/filo
-git pull origin main
-rsync -av --delete \
-  --exclude='.git' \
-  index.html catalog.html about.html delivery.html src/ public/ \
-  ~/ваш-домен.ru/public_html/
+bash /home/c/cm149295/filo-src/deploy.sh
 ```
+
+Или вручную:
+
+```bash
+cd /home/c/cm149295/filo-src
+git pull origin main
+rsync -av --delete index.html catalog.html about.html delivery.html /home/c/cm149295/filo/public_html/
+rsync -av --delete src /home/c/cm149295/filo/public_html/
+rsync -av --delete public/ /home/c/cm149295/filo/public_html/
+```
+
+> Важно: `src` копируется **без слэша** — так создаётся папка `public_html/src/`.
 
 ## Структура
 
