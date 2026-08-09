@@ -312,7 +312,7 @@ ul {
 
 /* ── Hero ── */
 .hero {
-  padding: 64px 0 80px;
+  padding: 64px 0 120px;
   background: linear-gradient(160deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
   overflow: hidden;
 }
@@ -1451,6 +1451,10 @@ ul {
 
   .hero-slider__track {
     min-height: 320px;
+  }
+
+  .hero {
+    padding-bottom: 140px;
   }
 
   .section__header--row {
