@@ -57,10 +57,11 @@ cd /home/c/cm149295/filo-src
 git pull origin main
 rsync -av --delete index.html catalog.html about.html delivery.html /home/c/cm149295/filo/public_html/
 rsync -av --delete src /home/c/cm149295/filo/public_html/
-rsync -av --delete public/ /home/c/cm149295/filo/public_html/
+rsync -av --delete public/images/ /home/c/cm149295/filo/public_html/images/
 ```
 
-> Важно: `src` копируется **без слэша** — так создаётся папка `public_html/src/`.
+> Важно: `src` копируется **без слэша** — так создаётся папка `public_html/src/`.  
+> `public/images/` копируется в `public_html/images/` — не `public/` в корень (иначе `--delete` сотрёт HTML и `src/`).
 
 ## Структура
 

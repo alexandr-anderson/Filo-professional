@@ -12,7 +12,8 @@ rsync -av --delete \
   "$WEB_DIR/"
 
 rsync -av --delete src "$WEB_DIR/"
-rsync -av --delete public/ "$WEB_DIR/"
+# Только images — не public/ целиком: --delete на корень удалил бы src/ и HTML
+rsync -av --delete public/images/ "$WEB_DIR/images/"
 
 rm -rf "$WEB_DIR/js" "$WEB_DIR/styles" "$WEB_DIR/data"
 rm -f "$WEB_DIR/main.js"
