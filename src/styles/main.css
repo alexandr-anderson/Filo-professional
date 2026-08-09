@@ -401,12 +401,17 @@ ul {
 
 .hero-slider__track {
   position: relative;
-  min-height: 420px;
+  width: 100%;
+  /* Квадрат картинки (100% ширины) + место под подпись — иначе caption вылезает на dots */
+  height: 0;
+  padding-bottom: calc(100% + 2.75rem);
 }
 
 .hero-slider__slide {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
   opacity: 0;
   transform: translateX(20px);
   transition: opacity 0.5s ease, transform 0.5s ease;
@@ -420,25 +425,32 @@ ul {
 }
 
 .hero-slider__frame {
+  flex: 1 1 auto;
+  min-height: 0;
   background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-md);
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .hero-slider__frame img {
-  max-height: 280px;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
+  height: auto;
   object-fit: contain;
 }
 
 .hero-slider__caption {
+  flex: 0 0 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-top: 16px;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 1.1rem;
   color: var(--color-text-muted);
@@ -448,7 +460,7 @@ ul {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .hero-slider__dot {
@@ -1449,8 +1461,8 @@ ul {
     margin: 0 auto;
   }
 
-  .hero-slider__track {
-    min-height: 320px;
+  .hero-slider__frame {
+    padding: 24px;
   }
 
   .hero {
