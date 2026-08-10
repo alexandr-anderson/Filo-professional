@@ -5,8 +5,9 @@ import {
   trustItems,
   formatPrice,
   PRICE_LABEL,
+  PRICE_HINT,
 } from '../data/products.js';
-import { TELEGRAM_USERNAME, BRAND_NAME } from '../data/config.js';
+import { TELEGRAM_USERNAME, BRAND_NAME, getTelegramPriceUrl } from '../data/config.js';
 import {
   getCart,
   getCartCount,
@@ -22,11 +23,26 @@ export function initApp() {
   renderTopBar();
   renderHeader();
   renderFooter();
+  wireTelegramLinks();
   initCart();
   initMobileMenu();
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
+}
+
+const CLIENT_TYPE_LABELS = {
+  salon: 'Салон',
+  master: 'Частный мастер',
+  personal: 'Для себя',
+};
+
+function wireTelegramLinks() {
+  document.querySelectorAll('[data-telegram="price"]').forEach((el) => {
+    el.href = getTelegramPriceUrl();
+    el.target = '_blank';
+    el.rel = 'noopener';
+  });
 }
 
 function renderTopBar() {
@@ -72,6 +88,7 @@ function renderHeader() {
           .join('')}
       </nav>
       <div class="header__actions">
+        <a href="#" data-telegram="price" class="btn btn--sm btn--secondary header__telegram">Telegram</a>
         <button class="cart-btn" id="cartBtn" aria-label="Корзина">
           <svg class="cart-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/>
@@ -169,6 +186,23 @@ function injectCartUI() {
       <form class="checkout-form" id="checkoutForm">
         <button type="button" class="form-back" id="backToCart">← Назад к корзине</button>
         <div class="form-group">
+          <span class="form-group__label">Кто заказывает *</span>
+          <div class="form-radio-group">
+            <label class="form-radio">
+              <input type="radio" name="clientType" value="salon" required>
+              <span>Салон</span>
+            </label>
+            <label class="form-radio">
+              <input type="radio" name="clientType" value="master" required>
+              <span>Частный мастер</span>
+            </label>
+            <label class="form-radio">
+              <input type="radio" name="clientType" value="personal" required>
+              <span>Для себя</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
           <label for="customerName">Имя *</label>
           <input type="text" id="customerName" name="name" required placeholder="Ваше имя">
         </div>
@@ -210,8 +244,9 @@ function injectCartUI() {
       <div class="cart-sidebar__footer" id="cartFooter">
         <div class="cart-sidebar__total">
           <span>Итого:</span>
-          <span class="cart-sidebar__total-value" id="cartTotal">0 ₽</span>
+          <span class="cart-sidebar__total-value" id="cartTotal">${PRICE_LABEL}</span>
         </div>
+        <p class="cart-sidebar__price-hint">${PRICE_HINT}</p>
         <button class="btn btn--primary btn--full" id="checkoutBtn">Оформить заказ</button>
       </div>
     </div>
@@ -337,9 +372,10 @@ function buildOrderMessage(formData) {
     '📦 Товары:',
     ...lines,
     '',
-    '💰 Стоимость: уточняется при оформлении',
+    '💰 Стоимость: цена по запросу — прайс в Telegram',
     '',
     '👤 Клиент:',
+    `Тип: ${CLIENT_TYPE_LABELS[formData.clientType] || formData.clientType}`,
     `Имя: ${formData.name}`,
     `Телефон: ${formData.phone}`,
     '',
@@ -362,6 +398,7 @@ async function handleOrderSubmit(e) {
   const messageEl = document.getElementById('formMessage');
 
   const formData = {
+    clientType: form.clientType.value,
     name: form.name.value.trim(),
     phone: form.phone.value.trim(),
     city: form.city.value.trim(),
@@ -416,7 +453,10 @@ export function renderProductCard(product, { compact = false } = {}) {
         <h3 class="product-card__name">${product.name}</h3>
         ${compact ? '' : `<p class="product-card__desc">${product.description}</p>`}
         <div class="product-card__meta">
-          <span class="product-card__price">${formatPrice()}</span>
+          <div class="product-card__pricing">
+            <span class="product-card__price">${formatPrice()}</span>
+            <span class="product-card__price-hint">${PRICE_HINT}</span>
+          </div>
           <span class="product-card__volume">${product.volume}</span>
         </div>
       </div>

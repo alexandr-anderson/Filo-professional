@@ -101,11 +101,12 @@ export const productLines = [
 
 export const trustItems = [
   { icon: '🚚', title: 'Доставка по РФ', text: 'СДЭК, Почта, Boxberry' },
-  { icon: '↩️', title: 'Консультация', text: 'Поможем с подбором' },
-  { icon: '🔒', title: 'Безопасная оплата', text: 'После подтверждения заказа' },
+  { icon: '↩️', title: 'Консультация', text: 'Поможем с подбором линейки' },
+  { icon: '🔒', title: 'Оплата', text: 'После согласования заказа' },
 ];
 
-export const PRICE_LABEL = 'уточняется';
+export const PRICE_LABEL = 'Цена по запросу';
+export const PRICE_HINT = 'Прайс для салонов и мастеров — в Telegram';
 
 export function formatPrice() {
   return PRICE_LABEL;
