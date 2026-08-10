@@ -62,6 +62,7 @@ index.html
 catalog.html
 about.html
 delivery.html
+privacy.html
 src/
 public/
 ```

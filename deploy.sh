@@ -8,7 +8,7 @@ cd "$SRC_DIR"
 git pull origin main
 
 rsync -av --delete \
-  index.html catalog.html about.html delivery.html \
+  index.html catalog.html about.html delivery.html privacy.html \
   "$WEB_DIR/"
 
 rsync -av --delete src "$WEB_DIR/"

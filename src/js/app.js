@@ -19,6 +19,7 @@ import {
 } from './cart.js';
 
 const currentPage = document.body.dataset.page || 'home';
+const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
 
 export function initApp() {
   renderTopBar();
@@ -27,6 +28,7 @@ export function initApp() {
   wireTelegramLinks();
   initCart();
   initMobileMenu();
+  initCookieConsent();
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
@@ -127,6 +129,7 @@ function renderFooter() {
             <li><a href="/catalog.html">Каталог</a></li>
             <li><a href="/delivery.html">Доставка</a></li>
             <li><a href="/about.html">О нас и контакты</a></li>
+            <li><a href="/privacy.html">Политика конфиденциальности</a></li>
           </ul>
         </div>
         <div>
@@ -140,6 +143,7 @@ function renderFooter() {
       </div>
       <div class="footer__bottom">
         <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia. Официальный дистрибьютор.</span>
+        <a href="/privacy.html" class="footer__legal">Политика конфиденциальности</a>
         <span>filoprofessional.com.br</span>
       </div>
     </div>
@@ -157,6 +161,32 @@ function initMobileMenu() {
 
   nav.querySelectorAll('.nav__link').forEach((link) => {
     link.addEventListener('click', () => nav.classList.remove('nav--open'));
+  });
+}
+
+function initCookieConsent() {
+  if (localStorage.getItem(COOKIE_CONSENT_KEY) || document.getElementById('cookieConsent')) return;
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
+    <div class="cookie-consent" id="cookieConsent" role="dialog" aria-live="polite" aria-label="Согласие на использование cookie">
+      <div class="container cookie-consent__inner">
+        <p class="cookie-consent__text">
+          Мы используем cookie для работы сайта и сохранения корзины.
+          <a href="/privacy.html">Политика конфиденциальности</a>.
+          Нажимая «Принять», вы соглашаетесь с их использованием.
+        </p>
+        <button type="button" class="btn btn--primary btn--sm cookie-consent__btn" id="cookieConsentAccept">
+          Принять
+        </button>
+      </div>
+    </div>`
+  );
+
+  document.getElementById('cookieConsentAccept')?.addEventListener('click', () => {
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    document.getElementById('cookieConsent')?.remove();
   });
 }
 
@@ -452,7 +482,7 @@ export function renderProductCard(product, { compact = false } = {}) {
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        ${compact ? '' : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
+        ${compact ? `<p class="product-card__tagline">${product.tagline}</p>` : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice()}</span>

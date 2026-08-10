@@ -7,6 +7,7 @@ export const products = [
     volume: '500 мл',
     description:
       'Редуктор объёма с экстрактом бразильского кофе — убирает пушистость, укрощает густые непослушные волосы. Берут перед выпрямлением, когда нужно снять объём и полотно легло ровнее.',
+    tagline: 'Редуктор на кофе — перед выпрямлением',
     line: 'Redutor de Volume',
     image: '/images/products/cafe-brasil.png',
   },
@@ -18,6 +19,7 @@ export const products = [
     volume: '500 мл',
     description:
       'Редуктор с наночастицами — и на объём, и на восстановление в одном флаконе. Часто берут к кератину и ботоксу, когда волосы ослаблены и их нужно подтянуть до утюжка.',
+    tagline: 'К кератину и ботоксу, когда волосы слабые',
     line: 'Redutor de Volume',
     image: '/images/products/bio-btx-reducer.png',
   },
@@ -29,6 +31,7 @@ export const products = [
     volume: '500 мл',
     description:
       'Лечебная линия для ломких и химически уставших волос — даёт плотность и блеск. Когда нужен ботокс или восстановление, а не жёсткое выпрямление в ноль.',
+    tagline: 'Восстановление без выпрямления в ноль',
     line: 'Tratamento',
     image: '/images/products/nano-btx-platinum.jpg',
   },
@@ -40,6 +43,7 @@ export const products = [
     volume: '60 мл',
     description:
       'Масло на финиш — после кератина или ботокса, на укладку и термозащиту. Блеск без липкости, масла из Амазонии.',
+    tagline: 'Финиш после кератина и ботокса',
     line: 'Finalizadores',
     image: '/images/products/splendor-oil.png',
   },
@@ -51,6 +55,7 @@ export const products = [
     volume: '3 × 250 мл',
     description:
       'Home care на три продукта: шампунь, кондиционер, маска. Удобно отдавать клиенту после увлажняющей процедуры — продлить эффект дома.',
+    tagline: 'Home care клиенту после процедуры',
     line: 'Home Care',
     image: '/images/products/kit-hydrat-therapy.png',
   },
@@ -65,11 +70,11 @@ export const categories = [
 ];
 
 export const features = [
-  { icon: '🐰', title: 'Cruelty-Free' },
-  { icon: '🌿', title: 'Органика' },
+  { icon: '💬', title: 'Подбор линейки' },
+  { icon: '🚚', title: 'Доставка по РФ' },
   { icon: '🇧🇷', title: '100% Бразилия' },
   { icon: '🔬', title: 'Нанотехнологии' },
-  { icon: '💇', title: 'Консультации' },
+  { icon: '✓', title: 'Официальный дистрибьютор' },
 ];
 
 export const productLines = [
