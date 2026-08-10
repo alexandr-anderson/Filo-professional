@@ -1406,7 +1406,11 @@ ul {
   line-height: 1.4;
 }
 
-.checkout-form__delivery {
+.checkout-form__delivery[hidden] {
+  display: none !important;
+}
+
+.checkout-form__delivery:not([hidden]) {
   display: flex;
   flex-direction: column;
   gap: 16px;

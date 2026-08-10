@@ -194,6 +194,7 @@ function initCart() {
   document.getElementById('backToCart')?.addEventListener('click', hideCheckout);
   document.getElementById('checkoutForm')?.addEventListener('submit', handleOrderSubmit);
   document.getElementById('needsDelivery')?.addEventListener('change', toggleDeliveryFields);
+  toggleDeliveryFields();
 
   updateCartUI();
 }
