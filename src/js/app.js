@@ -445,14 +445,14 @@ export function showToast(text) {
 
 export function renderProductCard(product, { compact = false } = {}) {
   return `
-    <article class="product-card ${compact ? 'product-card--compact' : ''}" data-category="${product.category}">
+    <article class="product-card ${compact ? 'product-card--compact' : 'product-card--expandable'}" data-category="${product.category}" data-id="${product.id}">
       <div class="product-card__image">
         <img src="${product.image}" alt="${product.name}" loading="lazy">
         <span class="product-card__category">${product.categoryLabel}</span>
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        ${compact ? '' : `<p class="product-card__desc">${product.description}</p>`}
+        ${compact ? '' : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice()}</span>
@@ -471,10 +471,44 @@ export function renderProductCard(product, { compact = false } = {}) {
 
 function bindAddToCart(container) {
   container.querySelectorAll('.add-to-cart').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       addToCart(btn.dataset.id);
       updateCartUI();
       showToast('Товар добавлен в корзину');
+    });
+  });
+}
+
+function bindProductCardExpand(container) {
+  container.querySelectorAll('.product-card--expandable').forEach((card) => {
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-expanded', 'false');
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.add-to-cart')) return;
+
+      const grid = card.closest('.products-grid');
+      const isExpanded = card.classList.contains('product-card--expanded');
+
+      grid?.querySelectorAll('.product-card--expanded').forEach((expandedCard) => {
+        expandedCard.classList.remove('product-card--expanded');
+        expandedCard.setAttribute('aria-expanded', 'false');
+      });
+
+      if (!isExpanded) {
+        card.classList.add('product-card--expanded');
+        card.setAttribute('aria-expanded', 'true');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.target.closest('.add-to-cart')) return;
+      e.preventDefault();
+      card.click();
     });
   });
 }
@@ -628,6 +662,7 @@ function initCatalog() {
 
   grid.innerHTML = products.map((p) => renderProductCard(p)).join('');
   bindAddToCart(grid);
+  bindProductCardExpand(grid);
 
   const params = new URLSearchParams(window.location.search);
   const initialCat = params.get('cat') || 'all';
