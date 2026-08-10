@@ -19,6 +19,7 @@ import {
 } from './cart.js';
 
 const currentPage = document.body.dataset.page || 'home';
+const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
 
 export function initApp() {
   renderTopBar();
@@ -27,6 +28,7 @@ export function initApp() {
   wireTelegramLinks();
   initCart();
   initMobileMenu();
+  initCookieConsent();
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
@@ -157,6 +159,30 @@ function initMobileMenu() {
 
   nav.querySelectorAll('.nav__link').forEach((link) => {
     link.addEventListener('click', () => nav.classList.remove('nav--open'));
+  });
+}
+
+function initCookieConsent() {
+  if (localStorage.getItem(COOKIE_CONSENT_KEY) || document.getElementById('cookieConsent')) return;
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
+    <div class="cookie-consent" id="cookieConsent" role="dialog" aria-live="polite" aria-label="Согласие на использование cookie">
+      <div class="container cookie-consent__inner">
+        <p class="cookie-consent__text">
+          Мы используем cookie для работы сайта и сохранения корзины. Нажимая «Принять», вы соглашаетесь с их использованием.
+        </p>
+        <button type="button" class="btn btn--primary btn--sm cookie-consent__btn" id="cookieConsentAccept">
+          Принять
+        </button>
+      </div>
+    </div>`
+  );
+
+  document.getElementById('cookieConsentAccept')?.addEventListener('click', () => {
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    document.getElementById('cookieConsent')?.remove();
   });
 }
 
