@@ -3,6 +3,7 @@ import {
   features,
   productLines,
   trustItems,
+  b2bBenefits,
   formatPrice,
   PRICE_LABEL,
   PRICE_HINT,
@@ -583,6 +584,20 @@ function initHome() {
       .join('');
   }
 
+  const b2bEl = document.getElementById('b2bBenefits');
+  if (b2bEl) {
+    b2bEl.innerHTML = b2bBenefits
+      .map(
+        (item) => `
+      <div class="info-card">
+        <div class="info-card__icon">${item.icon}</div>
+        <h3 class="info-card__title">${item.title}</h3>
+        <p class="info-card__text">${item.text}</p>
+      </div>`
+      )
+      .join('');
+  }
+
   const categoryGrid = document.getElementById('categoryGrid');
   if (categoryGrid) {
     categoryGrid.innerHTML = productLines
@@ -594,6 +609,7 @@ function initHome() {
         </div>
         <div class="category-card__body">
           <h3 class="category-card__title">${line.title}</h3>
+          ${line.subtitle ? `<p class="category-card__subtitle">${line.subtitle}</p>` : ''}
           <span class="category-card__link">Смотреть →</span>
         </div>
       </a>`
