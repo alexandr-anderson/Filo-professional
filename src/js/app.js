@@ -129,6 +129,7 @@ function renderFooter() {
             <li><a href="/catalog.html">Каталог</a></li>
             <li><a href="/delivery.html">Доставка</a></li>
             <li><a href="/about.html">О нас и контакты</a></li>
+            <li><a href="/privacy.html">Политика конфиденциальности</a></li>
           </ul>
         </div>
         <div>
@@ -142,6 +143,7 @@ function renderFooter() {
       </div>
       <div class="footer__bottom">
         <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia. Официальный дистрибьютор.</span>
+        <a href="/privacy.html" class="footer__legal">Политика конфиденциальности</a>
         <span>filoprofessional.com.br</span>
       </div>
     </div>
@@ -171,7 +173,9 @@ function initCookieConsent() {
     <div class="cookie-consent" id="cookieConsent" role="dialog" aria-live="polite" aria-label="Согласие на использование cookie">
       <div class="container cookie-consent__inner">
         <p class="cookie-consent__text">
-          Мы используем cookie для работы сайта и сохранения корзины. Нажимая «Принять», вы соглашаетесь с их использованием.
+          Мы используем cookie для работы сайта и сохранения корзины.
+          <a href="/privacy.html">Политика конфиденциальности</a>.
+          Нажимая «Принять», вы соглашаетесь с их использованием.
         </p>
         <button type="button" class="btn btn--primary btn--sm cookie-consent__btn" id="cookieConsentAccept">
           Принять
