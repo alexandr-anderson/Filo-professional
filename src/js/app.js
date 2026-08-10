@@ -452,7 +452,7 @@ export function renderProductCard(product, { compact = false } = {}) {
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        ${compact ? '' : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
+        ${compact ? `<p class="product-card__tagline">${product.tagline}</p>` : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice()}</span>

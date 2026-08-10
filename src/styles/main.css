@@ -756,6 +756,13 @@ ul {
   margin-bottom: 8px;
 }
 
+.product-card__tagline {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
 .product-card__desc {
   font-size: 0.85rem;
   color: var(--color-text-muted);
