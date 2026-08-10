@@ -34,12 +34,6 @@ export function initApp() {
   if (currentPage === 'catalog') initCatalog();
 }
 
-const CLIENT_TYPE_LABELS = {
-  salon: 'Салон',
-  master: 'Частный мастер',
-  personal: 'Для себя',
-};
-
 function wireTelegramLinks() {
   document.querySelectorAll('[data-telegram="price"]').forEach((el) => {
     el.href = getTelegramPriceUrl();
@@ -199,8 +193,16 @@ function initCart() {
   document.getElementById('checkoutBtn')?.addEventListener('click', showCheckout);
   document.getElementById('backToCart')?.addEventListener('click', hideCheckout);
   document.getElementById('checkoutForm')?.addEventListener('submit', handleOrderSubmit);
+  document.getElementById('needsDelivery')?.addEventListener('change', toggleDeliveryFields);
 
   updateCartUI();
+}
+
+function toggleDeliveryFields() {
+  const needsDelivery = document.getElementById('needsDelivery');
+  const deliveryFields = document.getElementById('deliveryFields');
+  if (!needsDelivery || !deliveryFields) return;
+  deliveryFields.hidden = !needsDelivery.checked;
 }
 
 function injectCartUI() {
@@ -217,23 +219,6 @@ function injectCartUI() {
       <form class="checkout-form" id="checkoutForm">
         <button type="button" class="form-back" id="backToCart">← Назад к корзине</button>
         <div class="form-group">
-          <span class="form-group__label">Кто заказывает *</span>
-          <div class="form-radio-group">
-            <label class="form-radio">
-              <input type="radio" name="clientType" value="salon" required>
-              <span>Салон</span>
-            </label>
-            <label class="form-radio">
-              <input type="radio" name="clientType" value="master" required>
-              <span>Частный мастер</span>
-            </label>
-            <label class="form-radio">
-              <input type="radio" name="clientType" value="personal" required>
-              <span>Для себя</span>
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
           <label for="customerName">Имя *</label>
           <input type="text" id="customerName" name="name" required placeholder="Ваше имя">
         </div>
@@ -241,33 +226,27 @@ function injectCartUI() {
           <label for="customerPhone">Телефон *</label>
           <input type="tel" id="customerPhone" name="phone" required placeholder="+7 (___) ___-__-__">
         </div>
-        <div class="form-row">
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" id="needsDelivery" name="needsDelivery">
+            <span>Нужна доставка</span>
+          </label>
+          <p class="form-hint">Если не отмечено — самовывоз в Санкт-Петербурге</p>
+        </div>
+        <div class="checkout-form__delivery" id="deliveryFields" hidden>
           <div class="form-group">
-            <label for="customerCity">Город *</label>
-            <input type="text" id="customerCity" name="city" required placeholder="Москва">
+            <label for="deliveryMethod">Способ доставки</label>
+            <select id="deliveryMethod" name="delivery">
+              <option value="">Выберите способ</option>
+              <option value="СДЭК">СДЭК</option>
+              <option value="Почта России">Почта России</option>
+              <option value="Boxberry">Boxberry</option>
+            </select>
           </div>
           <div class="form-group">
-            <label for="customerZip">Индекс</label>
-            <input type="text" id="customerZip" name="zip" placeholder="123456">
+            <label for="customerAddress">Адрес доставки</label>
+            <textarea id="customerAddress" name="address" placeholder="Можете указать адрес сейчас или уточнить менеджеру в Telegram после консультации"></textarea>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="customerAddress">Адрес доставки *</label>
-          <textarea id="customerAddress" name="address" required placeholder="Улица, дом, квартира, пункт выдачи"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="deliveryMethod">Способ доставки *</label>
-          <select id="deliveryMethod" name="delivery" required>
-            <option value="">Выберите способ</option>
-            <option value="СДЭК">СДЭК</option>
-            <option value="Почта России">Почта России</option>
-            <option value="Boxberry">Boxberry</option>
-            <option value="Самовывоз (СПб)">Самовывоз (СПб)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="customerComment">Комментарий</label>
-          <textarea id="customerComment" name="comment" placeholder="Пожелания к заказу"></textarea>
         </div>
         <div class="form-message" id="formMessage"></div>
         <button type="submit" class="btn btn--primary btn--full" id="submitOrder">Отправить заказ</button>
@@ -317,6 +296,10 @@ function hideCheckout() {
   document.getElementById('cartItems')?.classList.remove('cart-items-view--hidden');
   document.getElementById('checkoutForm')?.classList.remove('checkout-form--active');
   document.getElementById('cartFooter').style.display = '';
+  const needsDelivery = document.getElementById('needsDelivery');
+  const deliveryFields = document.getElementById('deliveryFields');
+  if (needsDelivery) needsDelivery.checked = false;
+  if (deliveryFields) deliveryFields.hidden = true;
   const msg = document.getElementById('formMessage');
   if (msg) {
     msg.className = 'form-message';
@@ -406,16 +389,16 @@ function buildOrderMessage(formData) {
     '💰 Стоимость: цена по запросу — прайс в Telegram',
     '',
     '👤 Клиент:',
-    `Тип: ${CLIENT_TYPE_LABELS[formData.clientType] || formData.clientType}`,
     `Имя: ${formData.name}`,
     `Телефон: ${formData.phone}`,
     '',
     '🚚 Доставка:',
-    `Город: ${formData.city}`,
-    formData.zip ? `Индекс: ${formData.zip}` : null,
-    `Адрес: ${formData.address}`,
-    `Способ: ${formData.delivery}`,
-    formData.comment ? `\n💬 Комментарий: ${formData.comment}` : null,
+    formData.needsDelivery
+      ? [
+          formData.delivery ? `Способ: ${formData.delivery}` : 'Способ: уточнить в Telegram',
+          formData.address ? `Адрес: ${formData.address}` : 'Адрес: уточнить в Telegram',
+        ].join('\n')
+      : 'Самовывоз (СПб)',
   ]
     .filter(Boolean)
     .join('\n');
@@ -429,14 +412,11 @@ async function handleOrderSubmit(e) {
   const messageEl = document.getElementById('formMessage');
 
   const formData = {
-    clientType: form.clientType.value,
     name: form.name.value.trim(),
     phone: form.phone.value.trim(),
-    city: form.city.value.trim(),
-    zip: form.zip.value.trim(),
-    address: form.address.value.trim(),
+    needsDelivery: form.needsDelivery.checked,
     delivery: form.delivery.value,
-    comment: form.comment.value.trim(),
+    address: form.address.value.trim(),
   };
 
   submitBtn.disabled = true;
