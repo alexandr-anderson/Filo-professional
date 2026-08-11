@@ -8,7 +8,7 @@ import {
   PRICE_LABEL,
   PRICE_HINT,
 } from '../data/products.js';
-import { TELEGRAM_USERNAME, BRAND_NAME, getTelegramPriceUrl } from '../data/config.js';
+import { TELEGRAM_USERNAME, BRAND_NAME, CONTACT_EMAIL, getTelegramUrl, getTelegramPriceUrl } from '../data/config.js';
 import {
   getCart,
   getCartCount,
@@ -129,8 +129,8 @@ function renderFooter() {
         <div>
           <div class="footer__title">Контакты</div>
           <ul class="footer__links">
-            <li><a href="https://t.me/filo_russia" target="_blank" rel="noopener">Telegram</a></li>
-            <li><a href="mailto:order@filo-russia.ru">order@filo-russia.ru</a></li>
+            <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
+            <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
             <li>Санкт-Петербург</li>
           </ul>
         </div>
@@ -428,7 +428,7 @@ async function handleOrderSubmit(e) {
   const orderMessage = buildOrderMessage(formData);
 
   if (TELEGRAM_USERNAME) {
-    const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(orderMessage)}`;
+    const url = `${getTelegramUrl()}?text=${encodeURIComponent(orderMessage)}`;
     window.open(url, '_blank');
     clearCart();
     updateCartUI();

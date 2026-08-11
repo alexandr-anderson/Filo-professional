@@ -49,6 +49,8 @@ Username бота/аккаунта для заказов — в `src/data/config
 
 ```js
 export const TELEGRAM_USERNAME = 'filo_russia';
+export const CONTACT_EMAIL = 'Filoprofessional2026@mail.ru';
+export const CONTACT_PHONE = '+79111789030';
 ```
 
 При оформлении заказ откроется в Telegram с готовым текстом.
@@ -106,7 +108,8 @@ rsync -av --delete public/images/ /home/c/cm149295/filo/public_html/images/
 
 | Что | Где |
 |-----|-----|
-| Telegram username | `src/data/config.js` |
-| Контакты (email, Telegram) | `src/js/app.js`, `about.html` |
+| Telegram, email, телефон | `src/data/config.js` |
+| Контакты в футере | `src/js/app.js` (из config) |
+| Телефон на сайте | `about.html` |
 | Товары и описания | `src/data/products.js` |
 | Цены | Пока скрыты («уточняется»), см. `formatPrice()` в `products.js` |
