@@ -48,7 +48,7 @@ python3 -m http.server 8080
 Username бота/аккаунта для заказов — в `src/data/config.js`:
 
 ```js
-export const TELEGRAM_USERNAME = 'filo_russia';
+export const TELEGRAM_USERNAME = 'filoproffesional';
 export const CONTACT_EMAIL = 'Filoprofessional2026@mail.ru';
 export const CONTACT_PHONE = '+79111789030';
 ```
