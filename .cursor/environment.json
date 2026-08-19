@@ -1,0 +1,4 @@
+{
+  "name": "Filo Professional agent",
+  "install": "mkdir -p \"$HOME/.cursor/skills\"\ncp -a .cursor/environment-skills/. \"$HOME/.cursor/skills/\""
+}
