@@ -16,6 +16,10 @@ export function getCartCount() {
   return getCart().reduce((sum, item) => sum + item.qty, 0);
 }
 
+export function getItemQty(productId) {
+  return getCart().find((item) => item.id === productId)?.qty || 0;
+}
+
 export function addToCart(productId) {
   const cart = getCart();
   const existing = cart.find((item) => item.id === productId);

@@ -12,6 +12,7 @@ import { TELEGRAM_USERNAME, BRAND_NAME, CONTACT_EMAIL, getTelegramUrl, getTelegr
 import {
   getCart,
   getCartCount,
+  getItemQty,
   addToCart,
   removeFromCart,
   updateQty,
@@ -321,6 +322,8 @@ function updateCartUI() {
   const totalEl = document.getElementById('cartTotal');
   if (totalEl) totalEl.textContent = PRICE_LABEL;
 
+  updateProductCardButtons();
+
   const itemsEl = document.getElementById('cartItems');
   if (!itemsEl) return;
 
@@ -454,7 +457,47 @@ export function showToast(text) {
   setTimeout(() => toast.classList.remove('toast--show'), 3000);
 }
 
+function renderAddControl(productId, qty) {
+  if (qty === 0) {
+    return `
+      <button class="product-card__add add-to-cart" data-id="${productId}" type="button">
+        <span>В корзину</span>
+        <span class="product-card__add-arrow">→</span>
+      </button>`;
+  }
+
+  return `
+    <div class="product-card__add product-card__add--in-cart" data-id="${productId}">
+      <button type="button" class="product-card__add-step" data-action="decrease" aria-label="Уменьшить количество">−</button>
+      <span class="product-card__add-count" aria-live="polite">${qty}</span>
+      <button type="button" class="product-card__add-step" data-action="increase" aria-label="Увеличить количество">+</button>
+    </div>`;
+}
+
+function updateProductCardButtons() {
+  document.querySelectorAll('.product-card[data-id]').forEach((card) => {
+    const productId = card.dataset.id;
+    const qty = getItemQty(productId);
+    const control = card.querySelector('.add-to-cart, .product-card__add--in-cart');
+    if (!control) return;
+
+    const inCart = control.classList.contains('product-card__add--in-cart');
+
+    if (qty > 0 && inCart) {
+      const countEl = control.querySelector('.product-card__add-count');
+      if (countEl) countEl.textContent = qty;
+      return;
+    }
+
+    if (qty === 0 && !inCart) return;
+
+    control.outerHTML = renderAddControl(productId, qty);
+  });
+}
+
 export function renderProductCard(product, { compact = false } = {}) {
+  const qty = getItemQty(product.id);
+
   return `
     <article class="product-card ${compact ? 'product-card--compact' : 'product-card--expandable'}" data-category="${product.category}" data-id="${product.id}">
       <div class="product-card__image">
@@ -472,22 +515,39 @@ export function renderProductCard(product, { compact = false } = {}) {
           <span class="product-card__volume">${product.volume}</span>
         </div>
       </div>
-      <button class="product-card__add add-to-cart" data-id="${product.id}" type="button">
-        <span>В корзину</span>
-        <span class="product-card__add-arrow">→</span>
-      </button>
+      ${renderAddControl(product.id, qty)}
     </article>
   `;
 }
 
 function bindAddToCart(container) {
-  container.querySelectorAll('.add-to-cart').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+  if (container.dataset.cartBound) return;
+  container.dataset.cartBound = '1';
+
+  container.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('.add-to-cart');
+    if (addBtn) {
       e.stopPropagation();
-      addToCart(btn.dataset.id);
+      addToCart(addBtn.dataset.id);
       updateCartUI();
-      showToast('Товар добавлен в корзину');
-    });
+      return;
+    }
+
+    const stepBtn = e.target.closest('.product-card__add-step');
+    if (!stepBtn) return;
+
+    e.stopPropagation();
+    const control = stepBtn.closest('.product-card__add--in-cart');
+    const productId = control?.dataset.id;
+    if (!productId) return;
+
+    const qty = getItemQty(productId);
+    if (stepBtn.dataset.action === 'increase') {
+      updateQty(productId, qty + 1);
+    } else {
+      updateQty(productId, qty - 1);
+    }
+    updateCartUI();
   });
 }
 
@@ -498,7 +558,7 @@ function bindProductCardExpand(container) {
     card.setAttribute('aria-expanded', 'false');
 
     card.addEventListener('click', (e) => {
-      if (e.target.closest('.add-to-cart')) return;
+      if (e.target.closest('.add-to-cart, .product-card__add--in-cart')) return;
 
       const grid = card.closest('.products-grid');
       const isExpanded = card.classList.contains('product-card--expanded');
@@ -517,7 +577,7 @@ function bindProductCardExpand(container) {
 
     card.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      if (e.target.closest('.add-to-cart')) return;
+      if (e.target.closest('.add-to-cart, .product-card__add--in-cart')) return;
       e.preventDefault();
       card.click();
     });
