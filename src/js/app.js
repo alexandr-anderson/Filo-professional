@@ -58,11 +58,25 @@ function initHeaderScroll() {
   const shell = document.getElementById('siteHeader');
   if (!shell) return;
 
-  const threshold = 20;
+  let lastY = window.scrollY;
   let ticking = false;
 
   const update = () => {
-    shell.classList.toggle('site-header--scrolled', window.scrollY > threshold);
+    const y = window.scrollY;
+    const delta = y - lastY;
+
+    shell.classList.toggle('site-header--scrolled', y > 24);
+    shell.classList.toggle('site-header--compact', y > 80);
+
+    if (y < 48 || document.body.classList.contains('nav-open')) {
+      shell.classList.remove('site-header--hidden');
+    } else if (delta > 8) {
+      shell.classList.add('site-header--hidden');
+    } else if (delta < -8) {
+      shell.classList.remove('site-header--hidden');
+    }
+
+    lastY = y;
     ticking = false;
   };
 
@@ -132,13 +146,9 @@ function renderHeader() {
       </nav>
       <div class="header__actions">
         <a href="#" data-telegram="price" class="btn btn--sm btn--secondary header__telegram">Telegram</a>
-        <button class="cart-btn" id="cartBtn" aria-label="Корзина">
-          <svg class="cart-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/>
-            <path d="M3 6h18"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          <span class="cart-btn__count" data-count="${count}">${count || ''}</span>
+        <button class="cart-btn" id="cartBtn" type="button" aria-label="Корзина, товаров: ${count}">
+          <span class="cart-btn__label">Корзина</span>
+          <span class="cart-btn__count" data-count="${count}">(${count})</span>
         </button>
         <button class="menu-toggle" id="menuToggle" type="button" aria-label="Меню" aria-expanded="false" aria-controls="nav">
           <span></span><span></span><span></span>
@@ -193,42 +203,79 @@ function renderFooter() {
 function initMobileMenu() {
   const toggle = document.getElementById('menuToggle');
   const nav = document.getElementById('nav');
+  const shell = document.getElementById('siteHeader');
   if (!toggle || !nav) return;
 
-  let overlay = document.getElementById('navOverlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'navOverlay';
-    overlay.className = 'nav-overlay';
-    overlay.hidden = true;
-    document.body.appendChild(overlay);
-  }
+  const focusableSelector =
+    'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  const isMobileNav = () => window.matchMedia('(max-width: 768px)').matches;
+
+  const syncNavAria = (open = nav.classList.contains('nav--open')) => {
+    if (!isMobileNav()) {
+      nav.setAttribute('aria-hidden', 'false');
+      return;
+    }
+    nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+  };
+
+  syncNavAria(false);
 
   const setOpen = (open) => {
     nav.classList.toggle('nav--open', open);
     toggle.classList.toggle('menu-toggle--active', open);
-    overlay.classList.toggle('nav-overlay--visible', open);
     document.body.classList.toggle('nav-open', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    overlay.hidden = !open;
+    shell?.classList.toggle('site-header--nav-open', open);
+    syncNavAria(open);
+
+    if (open) {
+      shell?.classList.remove('site-header--hidden');
+      const first = nav.querySelector(focusableSelector);
+      if (first) first.focus();
+    } else if (isMobileNav()) {
+      toggle.focus();
+    }
   };
 
   toggle.addEventListener('click', () => {
     setOpen(!nav.classList.contains('nav--open'));
   });
 
-  overlay.addEventListener('click', () => setOpen(false));
-
   nav.querySelectorAll('.nav__link').forEach((link) => {
     link.addEventListener('click', () => setOpen(false));
   });
 
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) setOpen(false);
+    if (window.matchMedia('(min-width: 769px)').matches) {
+      setOpen(false);
+      syncNavAria(false);
+    }
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Escape' && nav.classList.contains('nav--open')) {
+      setOpen(false);
+      return;
+    }
+
+    if (e.key !== 'Tab' || !nav.classList.contains('nav--open')) return;
+
+    const focusable = [toggle, ...nav.querySelectorAll(focusableSelector)].filter(
+      (el, i, arr) => arr.indexOf(el) === i
+    );
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   });
 }
 
@@ -388,8 +435,13 @@ function updateCartUI() {
 
   const countEl = document.querySelector('.cart-btn__count');
   if (countEl) {
-    countEl.textContent = count || '';
+    countEl.textContent = `(${count})`;
     countEl.dataset.count = count;
+  }
+
+  const cartBtn = document.getElementById('cartBtn');
+  if (cartBtn) {
+    cartBtn.setAttribute('aria-label', `Корзина, товаров: ${count}`);
   }
 
   const totalEl = document.getElementById('cartTotal');
@@ -683,12 +735,22 @@ function bindProductCardExpand(container) {
   });
 }
 
+function padSlideIndex(n) {
+  return String(n).padStart(2, '0');
+}
+
 function initHeroSlider() {
   const track = document.getElementById('heroSliderTrack');
-  const dots = document.getElementById('heroSliderDots');
-  if (!track || !dots) return;
+  const currentEl = document.getElementById('heroSliderCurrent');
+  const totalEl = document.getElementById('heroSliderTotal');
+  if (!track) return;
 
-  track.innerHTML = products
+  const slides = products.slice(0, 4);
+  if (!slides.length) return;
+
+  if (totalEl) totalEl.textContent = padSlideIndex(slides.length);
+
+  track.innerHTML = slides
     .map(
       (p, i) => `
     <div class="hero-slider__slide ${i === 0 ? 'hero-slider__slide--active' : ''}" data-index="${i}">
@@ -700,13 +762,6 @@ function initHeroSlider() {
     )
     .join('');
 
-  dots.innerHTML = products
-    .map(
-      (_, i) =>
-        `<button class="hero-slider__dot ${i === 0 ? 'hero-slider__dot--active' : ''}" data-index="${i}" aria-label="Слайд ${i + 1}"></button>`
-    )
-    .join('');
-
   let current = 0;
   let timer;
 
@@ -715,27 +770,25 @@ function initHeroSlider() {
     track.querySelectorAll('.hero-slider__slide').forEach((slide, i) => {
       slide.classList.toggle('hero-slider__slide--active', i === current);
     });
-    dots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
-      dot.classList.toggle('hero-slider__dot--active', i === current);
-    });
+    if (currentEl) currentEl.textContent = padSlideIndex(current + 1);
   }
 
   function next() {
-    goTo((current + 1) % products.length);
+    goTo((current + 1) % slides.length);
   }
-
-  dots.querySelectorAll('.hero-slider__dot').forEach((dot) => {
-    dot.addEventListener('click', () => {
-      goTo(Number(dot.dataset.index));
-      resetTimer();
-    });
-  });
 
   function resetTimer() {
     clearInterval(timer);
-    timer = setInterval(next, 5000);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    timer = setInterval(next, 4800);
   }
 
+  track.addEventListener('click', () => {
+    next();
+    resetTimer();
+  });
+
+  goTo(0);
   resetTimer();
 }
 
@@ -758,19 +811,6 @@ function initCarousel() {
 }
 
 function initHome() {
-  const heroFeatures = document.getElementById('heroFeatures');
-  if (heroFeatures) {
-    heroFeatures.innerHTML = features
-      .slice(0, 4)
-      .map(
-        (f) => `
-      <div class="hero__feature">
-        <span>${f.title}</span>
-      </div>`
-      )
-      .join('');
-  }
-
   const trustBar = document.getElementById('trustBar');
   if (trustBar) {
     trustBar.innerHTML = trustItems
