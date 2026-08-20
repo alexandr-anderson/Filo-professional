@@ -418,7 +418,6 @@ function updateCartUI() {
   if (cart.length === 0) {
     itemsEl.innerHTML = `
       <div class="cart-empty">
-        <div class="cart-empty__icon">🛒</div>
         <p>Корзина пуста</p>
         <a href="/catalog.html" class="btn btn--secondary btn--sm" style="margin-top:16px">Перейти в каталог</a>
       </div>
@@ -766,7 +765,6 @@ function initHome() {
       .map(
         (f) => `
       <div class="hero__feature">
-        <span class="hero__feature-icon">${f.icon}</span>
         <span>${f.title}</span>
       </div>`
       )
