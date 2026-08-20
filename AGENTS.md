@@ -10,12 +10,9 @@
 
 ## Скилы
 
-Проектные скилы живут в **окружении агента**, не в `.agents/skills/` репозитория сайта:
+Проектные скилы лежат в [`.cursor/skills/`](.cursor/skills/) — Cursor подхватывает их автоматически и показывает в **Customize → Skills** (и в Agent через `/имя-скилла`).
 
-- исходники для сборки: `.cursor/environment-skills/`
-- установка в `install` из `.cursor/environment.json` копирует их в `~/.cursor/skills/` (user-level, глобально для агента)
-
-Не возвращай скилы в `.agents/skills/` без явной просьбы.
+Каждый скилл — папка с `SKILL.md` и YAML frontmatter (`name`, `description`). Не дублируй те же скилы в `.agents/skills/` без явной просьбы.
 
 ## Редизайн и визуал
 
