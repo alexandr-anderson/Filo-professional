@@ -112,4 +112,4 @@ rsync -av --delete public/images/ /home/c/cm149295/filo/public_html/images/
 | Контакты в футере | `src/js/app.js` (из config) |
 | Телефон на сайте | `about.html` |
 | Товары и описания | `src/data/products.js` |
-| Цены | Пока скрыты («уточняется»), см. `formatPrice()` в `products.js` |
+| Цены | Поле `price` в `src/data/products.js`; без цены — «Цена по запросу» |
