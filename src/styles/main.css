@@ -995,7 +995,7 @@ body.nav-open {
 
 .product-card__price {
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text);
   font-style: normal;
 }
