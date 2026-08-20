@@ -5,6 +5,9 @@ import {
   trustItems,
   b2bBenefits,
   formatPrice,
+  formatRubles,
+  formatCartTotal,
+  getCartPricing,
   PRICE_LABEL,
   PRICE_HINT,
 } from '../data/products.js';
@@ -258,7 +261,7 @@ function injectCartUI() {
           <span>Итого:</span>
           <span class="cart-sidebar__total-value" id="cartTotal">${PRICE_LABEL}</span>
         </div>
-        <p class="cart-sidebar__price-hint">${PRICE_HINT}</p>
+        <p class="cart-sidebar__price-hint" id="cartPriceHint">${PRICE_HINT}</p>
         <button class="btn btn--primary btn--full" id="checkoutBtn">Оформить заказ</button>
       </div>
     </div>
@@ -320,7 +323,22 @@ function updateCartUI() {
   }
 
   const totalEl = document.getElementById('cartTotal');
-  if (totalEl) totalEl.textContent = PRICE_LABEL;
+  if (totalEl) totalEl.textContent = formatCartTotal(cart);
+
+  const hintEl = document.getElementById('cartPriceHint');
+  if (hintEl) {
+    const { hasPriced, hasUnpriced } = getCartPricing(cart);
+    if (hasPriced && !hasUnpriced) {
+      hintEl.textContent = '';
+      hintEl.hidden = true;
+    } else if (hasPriced && hasUnpriced) {
+      hintEl.hidden = false;
+      hintEl.textContent = 'Позиции без цены в каталоге — уточним в Telegram';
+    } else {
+      hintEl.hidden = false;
+      hintEl.textContent = PRICE_HINT;
+    }
+  }
 
   updateProductCardButtons();
 
@@ -349,7 +367,7 @@ function updateCartUI() {
           </div>
           <div class="cart-item__info">
             <div class="cart-item__name">${product.name}</div>
-            <div class="cart-item__price">${formatPrice()}</div>
+            <div class="cart-item__price">${formatPrice(product)}${item.qty > 1 ? ` × ${item.qty}` : ''}</div>
             <div class="cart-item__qty">
               <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}">−</button>
               <span class="cart-item__qty-value">${item.qty}</span>
@@ -381,8 +399,20 @@ function buildOrderMessage(formData) {
   const cart = getCart();
   const lines = cart.map((item) => {
     const product = products.find((p) => p.id === item.id);
-    return `• ${product.name} × ${item.qty}`;
+    const pricePart =
+      product?.price != null
+        ? ` — ${formatRubles(product.price * item.qty)}`
+        : ' — цена по запросу';
+    return `• ${product.name} × ${item.qty}${pricePart}`;
   });
+
+  const { total, hasPriced, hasUnpriced } = getCartPricing(cart);
+  let costLine = '💰 Стоимость: цена по запросу — прайс в Telegram';
+  if (hasPriced) {
+    costLine = hasUnpriced
+      ? `💰 Итого по позициям с ценой: ${formatRubles(total)} (остальное — уточним в Telegram)`
+      : `💰 Итого: ${formatRubles(total)}`;
+  }
 
   return [
     '🛍 Новый заказ FILO Professional',
@@ -390,7 +420,7 @@ function buildOrderMessage(formData) {
     '📦 Товары:',
     ...lines,
     '',
-    '💰 Стоимость: цена по запросу — прайс в Telegram',
+    costLine,
     '',
     '👤 Клиент:',
     `Имя: ${formData.name}`,
@@ -509,8 +539,8 @@ export function renderProductCard(product, { compact = false } = {}) {
         ${compact ? `<p class="product-card__tagline">${product.tagline}</p>` : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
         <div class="product-card__meta">
           <div class="product-card__pricing">
-            <span class="product-card__price">${formatPrice()}</span>
-            <span class="product-card__price-hint">${PRICE_HINT}</span>
+            <span class="product-card__price">${formatPrice(product)}</span>
+            ${product.price == null ? `<span class="product-card__price-hint">${PRICE_HINT}</span>` : ''}
           </div>
           <span class="product-card__volume">${product.volume}</span>
         </div>

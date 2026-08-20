@@ -1,15 +1,68 @@
 export const products = [
   {
     id: 'cafe-brasil',
-    name: 'Café Brasil',
+    name: 'Café Verde',
     category: 'volume',
     categoryLabel: 'Редуктор объёма',
-    volume: '500 мл',
+    volume: '1 л',
+    price: 7250,
     description:
-      'Редуктор объёма с экстрактом бразильского кофе — убирает пушистость, укрощает густые непослушные волосы. Берут перед выпрямлением, когда нужно снять объём и полотно легло ровнее.',
-    tagline: 'Редуктор на кофе — перед выпрямлением',
-    line: 'Redutor de Volume',
-    image: '/images/products/cafe-brasil.png',
+      'Редуктор объёма с маслом зелёного кофе — убирает пушистость, укрощает густые непослушные волосы. Берут перед выпрямлением, когда нужно снять объём и полотно легло ровнее.',
+    tagline: 'Редуктор на зелёном кофе — перед выпрямлением',
+    line: 'Café Brasil Lisoriance',
+    image: '/images/products/cafe-verde.png',
+  },
+  {
+    id: 'ultra-fast',
+    name: 'Ultra Fast Keratin',
+    category: 'volume',
+    categoryLabel: 'Редуктор объёма',
+    volume: '1 л',
+    price: 6450,
+    description:
+      'Быстрый редуктор объёма с кератином, маслом бабасу и биотином — реструктурирует и выравнивает полотно. Когда нужен результат за один сеанс без лишней паузы в кресле.',
+    tagline: 'Быстрое выпрямление и редуктор в одном флаконе',
+    line: 'Ultra Fast Keratin',
+    image: '/images/products/ultra-fast.png',
+  },
+  {
+    id: 'apricot',
+    name: 'Apricot',
+    category: 'volume',
+    categoryLabel: 'Редуктор объёма',
+    volume: '1 л',
+    price: 6780,
+    description:
+      'Nanolisoriance на абрикосе — редуктор и восстановление с мягким воздействием на полотно. Хороший вариант, когда нужен баланс между выпрямлением и уходом.',
+    tagline: 'Мягкий редуктор с абрикосовыми активами',
+    line: 'Apricot Nanolisoriance',
+    image: '/images/products/apricot.png',
+  },
+  {
+    id: 'bio-tannin',
+    name: 'Bio Tannin',
+    category: 'volume',
+    categoryLabel: 'Танинопластика',
+    volume: '1 л',
+    price: 6620,
+    description:
+      'Танинопластика на дубильных компонентах — альтернатива кератину для выпрямления и реконструкции. Берут, когда клиент хочет танин, а не классический кератин.',
+    tagline: 'Танинопластика вместо кератина',
+    line: 'Biotannin',
+    image: '/images/products/bio-tannin.png',
+  },
+  {
+    id: 'bamboo-therapy',
+    name: 'Bamboo Thérapie',
+    category: 'treatment',
+    categoryLabel: 'Лечение',
+    volume: '500 г',
+    price: 3810,
+    description:
+      'Липидная маска на бамбуке — глубокое питание и восстановление массы волос после осветления, химии и редукторов. Часто идёт на финиш после кератина или между процедурами.',
+    tagline: 'Липидка — восстановление массы волос',
+    line: 'Bamboo Thérapie',
+    image: '/images/products/bamboo-therapy.png',
   },
   {
     id: 'bio-btx-reducer',
@@ -122,7 +175,7 @@ export const b2bBenefits = [
   {
     icon: '✓',
     title: 'Официальный дистрибьютор',
-    text: 'Прямые поставки FILO Professional. Прайс для салонов и мастеров — в Telegram.',
+    text: 'Прямые поставки FILO Professional. Актуальные цены на ключевые позиции — в каталоге, остальной прайс в Telegram.',
   },
 ];
 
@@ -135,8 +188,46 @@ export const trustItems = [
 export const PRICE_LABEL = 'Цена по запросу';
 export const PRICE_HINT = 'Прайс для салонов и мастеров — в Telegram';
 
-export function formatPrice() {
+export function formatRubles(amount) {
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function formatPrice(product) {
+  if (product?.price != null) {
+    return formatRubles(product.price);
+  }
   return PRICE_LABEL;
+}
+
+export function getCartPricing(cart) {
+  let total = 0;
+  let hasPriced = false;
+  let hasUnpriced = false;
+
+  for (const item of cart) {
+    const product = getProductById(item.id);
+    if (!product) continue;
+    if (product.price != null) {
+      total += product.price * item.qty;
+      hasPriced = true;
+    } else {
+      hasUnpriced = true;
+    }
+  }
+
+  return { total, hasPriced, hasUnpriced };
+}
+
+export function formatCartTotal(cart) {
+  const { total, hasPriced, hasUnpriced } = getCartPricing(cart);
+  if (!hasPriced) return PRICE_LABEL;
+  const formatted = formatRubles(total);
+  if (hasUnpriced) return `${formatted} + уточнение`;
+  return formatted;
 }
 
 export function getProductById(id) {
