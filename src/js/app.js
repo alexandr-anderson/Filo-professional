@@ -25,14 +25,56 @@ const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
 export function initApp() {
   renderTopBar();
   renderHeader();
+  wrapSiteHeader();
   renderFooter();
   wireTelegramLinks();
+  initHeaderScroll();
   initCart();
   initMobileMenu();
   initCookieConsent();
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
+}
+
+function wrapSiteHeader() {
+  const topBar = document.getElementById('topBar');
+  const header = document.querySelector('.header');
+  if (!topBar || !header || document.getElementById('siteHeader')) return;
+
+  const shell = document.createElement('div');
+  shell.className = 'site-header';
+  shell.id = 'siteHeader';
+
+  const parent = topBar.parentNode;
+  parent.insertBefore(shell, topBar);
+  shell.append(topBar, header);
+}
+
+function initHeaderScroll() {
+  const shell = document.getElementById('siteHeader');
+  if (!shell) return;
+
+  const threshold = 20;
+  let ticking = false;
+
+  const update = () => {
+    shell.classList.toggle('site-header--scrolled', window.scrollY > threshold);
+    ticking = false;
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    },
+    { passive: true }
+  );
+
+  update();
 }
 
 function wireTelegramLinks() {
@@ -95,7 +137,7 @@ function renderHeader() {
           </svg>
           <span class="cart-btn__count" data-count="${count}">${count || ''}</span>
         </button>
-        <button class="menu-toggle" id="menuToggle" aria-label="Меню">
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Меню" aria-expanded="false" aria-controls="nav">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -150,12 +192,40 @@ function initMobileMenu() {
   const nav = document.getElementById('nav');
   if (!toggle || !nav) return;
 
+  let overlay = document.getElementById('navOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'navOverlay';
+    overlay.className = 'nav-overlay';
+    overlay.hidden = true;
+    document.body.appendChild(overlay);
+  }
+
+  const setOpen = (open) => {
+    nav.classList.toggle('nav--open', open);
+    toggle.classList.toggle('menu-toggle--active', open);
+    overlay.classList.toggle('nav-overlay--visible', open);
+    document.body.classList.toggle('nav-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    overlay.hidden = !open;
+  };
+
   toggle.addEventListener('click', () => {
-    nav.classList.toggle('nav--open');
+    setOpen(!nav.classList.contains('nav--open'));
   });
 
+  overlay.addEventListener('click', () => setOpen(false));
+
   nav.querySelectorAll('.nav__link').forEach((link) => {
-    link.addEventListener('click', () => nav.classList.remove('nav--open'));
+    link.addEventListener('click', () => setOpen(false));
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
   });
 }
 
