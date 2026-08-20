@@ -1,0 +1,9 @@
+{
+  "install": "python3 --version && test -f index.html && test -f catalog.html && test -f src/main.js",
+  "terminals": [
+    {
+      "name": "static-site",
+      "command": "python3 -m http.server 8080 --bind 0.0.0.0"
+    }
+  ]
+}
