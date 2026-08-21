@@ -820,6 +820,7 @@ function initHeroSlider() {
   const track = document.getElementById('heroSliderTrack');
   const currentEl = document.getElementById('heroSliderCurrent');
   const totalEl = document.getElementById('heroSliderTotal');
+  const captionEl = document.getElementById('heroSliderCaption');
   if (!track) return;
 
   const slides = products.slice(0, 4);
@@ -834,7 +835,6 @@ function initHeroSlider() {
       <div class="hero-slider__frame">
         <img src="${p.image}" alt="${p.name}" loading="${i === 0 ? 'eager' : 'lazy'}">
       </div>
-      <p class="hero-slider__caption">${p.name}</p>
     </div>`
     )
     .join('');
@@ -848,6 +848,7 @@ function initHeroSlider() {
       slide.classList.toggle('hero-slider__slide--active', i === current);
     });
     if (currentEl) currentEl.textContent = padSlideIndex(current + 1);
+    if (captionEl) captionEl.textContent = slides[current].name;
   }
 
   function next() {
