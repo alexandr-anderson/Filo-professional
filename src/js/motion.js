@@ -152,10 +152,16 @@ function setStoryChapter(index) {
   const safe = Math.max(0, Math.min(index, chapters.length - 1));
 
   chapters.forEach((el, i) => {
-    el.classList.toggle('is-active', i === safe);
+    const active = i === safe;
+    el.classList.toggle('is-active', active);
+    el.setAttribute('aria-hidden', active ? 'false' : 'true');
+    if (active) el.setAttribute('aria-current', 'true');
+    else el.removeAttribute('aria-current');
   });
   frames.forEach((el, i) => {
-    el.classList.toggle('is-active', i === safe);
+    const active = i === safe;
+    el.classList.toggle('is-active', active);
+    el.setAttribute('aria-hidden', active ? 'false' : 'true');
   });
   if (progress) progress.textContent = padStoryIndex(safe + 1);
 }
@@ -207,9 +213,14 @@ function initStoryScroll() {
   mm.add('(max-width: 900px), (prefers-reduced-motion: reduce)', () => {
     story.classList.add('story--static');
     story.classList.remove('story--pinned');
-    chapters.forEach((el) => el.classList.add('is-active'));
+    chapters.forEach((el) => {
+      el.classList.add('is-active');
+      el.setAttribute('aria-hidden', 'false');
+      el.removeAttribute('aria-current');
+    });
     story.querySelectorAll('[data-story-frame]').forEach((el, i) => {
       el.classList.toggle('is-active', i === 0);
+      el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
     });
   });
 }

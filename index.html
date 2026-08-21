@@ -14,16 +14,19 @@
   <meta property="og:description" content="Кератин, ботокс, редуктор объёма. Официальный дистрибьютор в России. Прайс в Telegram.">
   <meta property="og:image" content="https://filo-professional.ru/images/hero-brand.png">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Piazzolla:ital,opsz,wght@0,8..30,400;0,8..30,500;0,8..30,600;1,8..30,400;1,8..30,500&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="/images/products/cafe-verde.png" fetchpriority="high">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="home">
+  <a class="skip-link" href="#main">К содержимому</a>
   <div class="top-bar" id="topBar"></div>
   <header class="header"></header>
 
-  <main>
+  <main id="main">
     <section class="hero" id="hero">
       <div class="container hero__inner">
         <div class="hero__content" data-hero-layer="copy">
@@ -43,7 +46,7 @@
           <div class="hero__blush" data-hero-layer="blush" aria-hidden="true"></div>
           <div class="hero-slider" id="heroSlider" aria-roledescription="carousel" aria-label="Линейки FILO">
             <div class="hero-slider__track" id="heroSliderTrack"></div>
-            <p class="hero-slider__caption" id="heroSliderCaption"></p>
+            <p class="hero-slider__caption" id="heroSliderCaption" aria-live="polite"></p>
             <div class="hero-slider__index" id="heroSliderIndex" aria-live="polite">
               <span class="hero-slider__index-current" id="heroSliderCurrent">01</span>
               <span class="hero-slider__index-sep" aria-hidden="true">—</span>
@@ -147,13 +150,13 @@
               <div class="story__blush" aria-hidden="true"></div>
               <div class="story__frames" id="storyFrames">
                 <figure class="story__frame is-active" data-story-frame="0">
-                  <img src="/images/categories/volume.png" alt="Линейка редуктора FILO" loading="lazy">
+                  <img src="/images/categories/volume.png" alt="Линейка редуктора FILO" loading="lazy" decoding="async">
                 </figure>
                 <figure class="story__frame" data-story-frame="1">
-                  <img src="/images/categories/treatment.png" alt="Лечебные линейки FILO" loading="lazy">
+                  <img src="/images/categories/treatment.png" alt="Лечебные линейки FILO" loading="lazy" decoding="async">
                 </figure>
                 <figure class="story__frame" data-story-frame="2">
-                  <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy">
+                  <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy" decoding="async">
                 </figure>
               </div>
             </div>
@@ -176,7 +179,7 @@
         <div class="about-split__visual">
           <div class="about-split__blush" aria-hidden="true"></div>
           <div class="about-split__frame">
-            <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy">
+            <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
