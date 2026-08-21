@@ -1,6 +1,5 @@
 import {
   products,
-  features,
   productLines,
   trustItems,
   b2bBenefits,
@@ -12,7 +11,18 @@ import {
   PRICE_LABEL,
   PRICE_HINT,
 } from '../data/products.js';
-import { TELEGRAM_USERNAME, BRAND_NAME, CONTACT_EMAIL, getTelegramUrl, getTelegramPriceUrl } from '../data/config.js';
+import {
+  TELEGRAM_USERNAME,
+  BRAND_NAME,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  CONTACT_PHONE_DISPLAY,
+  OPERATOR_NAME,
+  OPERATOR_INN,
+  OPERATOR_OGRNIP,
+  getTelegramUrl,
+  getTelegramPriceUrl,
+} from '../data/config.js';
 import {
   getCart,
   getCartCount,
@@ -108,16 +118,10 @@ function renderTopBar() {
   if (!topBar) return;
 
   topBar.innerHTML = `
-    <div class="container top-bar__inner">
-      ${features
-        .map(
-          (f) => `
-        <div class="top-bar__item">
-          <span class="top-bar__icon">${f.icon}</span>
-          <span>${f.title}</span>
-        </div>`
-        )
-        .join('')}
+    <div class="container top-bar__inner top-bar__inner--contact">
+      <span class="top-bar__contact">Санкт-Петербург · Пн–Пт 10:00–19:00</span>
+      <a class="top-bar__contact" href="${getTelegramUrl()}" target="_blank" rel="noopener">@${TELEGRAM_USERNAME}</a>
+      <a class="top-bar__contact" href="tel:${CONTACT_PHONE}">${CONTACT_PHONE_DISPLAY}</a>
     </div>
   `;
 }
@@ -189,13 +193,15 @@ function renderFooter() {
             <ul class="footer__links">
               <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
               <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
+              <li><a href="tel:${CONTACT_PHONE}">${CONTACT_PHONE_DISPLAY}</a></li>
+              <li>Пн–Пт, 10:00–19:00 (МСК)</li>
               <li>Санкт-Петербург</li>
             </ul>
           </div>
         </div>
       </div>
       <div class="footer__bottom">
-        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia</span>
+        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia · ${OPERATOR_NAME} · ИНН ${OPERATOR_INN} · ОГРНИП ${OPERATOR_OGRNIP}</span>
         <a href="/privacy.html" class="footer__legal">Политика конфиденциальности</a>
         <a href="https://filoprofessional.com.br" class="footer__legal" target="_blank" rel="noopener">filoprofessional.com.br</a>
       </div>
@@ -378,6 +384,18 @@ function injectCartUI() {
         <div class="form-group">
           <label for="customerPhone">Телефон *</label>
           <input type="tel" id="customerPhone" name="phone" required autocomplete="tel" placeholder="+7 (___) ___-__-__">
+        </div>
+        <div class="form-group">
+          <label for="customerCity">Город *</label>
+          <input type="text" id="customerCity" name="city" required autocomplete="address-level2" placeholder="Город доставки или самовывоза">
+        </div>
+        <div class="form-group">
+          <label for="customerType">Вы *</label>
+          <select id="customerType" name="clientType" required>
+            <option value="">Салон или частный мастер</option>
+            <option value="Салон">Салон</option>
+            <option value="Частный мастер">Частный мастер</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-checkbox">
@@ -602,6 +620,8 @@ function buildOrderMessage(formData) {
     'Клиент:',
     `Имя: ${formData.name}`,
     `Телефон: ${formData.phone}`,
+    `Город: ${formData.city}`,
+    `Тип: ${formData.clientType}`,
     '',
     'Доставка:',
     formData.needsDelivery
@@ -625,6 +645,8 @@ async function handleOrderSubmit(e) {
   const formData = {
     name: form.name.value.trim(),
     phone: form.phone.value.trim(),
+    city: form.city.value.trim(),
+    clientType: form.clientType.value,
     needsDelivery: form.needsDelivery.checked,
     delivery: form.delivery.value,
     address: form.address.value.trim(),
@@ -640,20 +662,51 @@ async function handleOrderSubmit(e) {
   if (TELEGRAM_USERNAME) {
     const url = `${getTelegramUrl()}?text=${encodeURIComponent(orderMessage)}`;
     window.open(url, '_blank');
-    clearCart();
-    updateCartUI();
+    try {
+      await navigator.clipboard.writeText(orderMessage);
+    } catch (_) {
+      /* clipboard may be blocked */
+    }
     messageEl.className = 'form-message form-message--success';
-    messageEl.textContent = 'Откроется Telegram — нажмите «Отправить» для завершения заказа.';
-    form.reset();
+    messageEl.replaceChildren();
+    const lead = document.createElement('p');
+    lead.textContent = 'Откроется Telegram — нажмите «Отправить». Если чат не открылся, скопируйте заказ ниже.';
+    const area = document.createElement('textarea');
+    area.className = 'form-order-copy';
+    area.readOnly = true;
+    area.rows = 8;
+    area.value = orderMessage;
+    const actions = document.createElement('div');
+    actions.className = 'form-order-actions';
+    actions.innerHTML = `
+      <button type="button" class="btn btn--secondary btn--sm" id="copyOrderBtn">Скопировать заказ</button>
+      <button type="button" class="btn btn--accent btn--sm" id="confirmOrderSent">Я отправил</button>
+    `;
+    messageEl.append(lead, area, actions);
+    document.getElementById('copyOrderBtn')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(orderMessage);
+        showToast('Заказ скопирован');
+      } catch (_) {
+        document.querySelector('.form-order-copy')?.select();
+      }
+    });
+    document.getElementById('confirmOrderSent')?.addEventListener('click', () => {
+      clearCart();
+      updateCartUI();
+      form.reset();
+      hideCheckout();
+      showToast('Спасибо! Заказ отправлен');
+      closeCart();
+    });
     showToast('Переход в Telegram...');
-    setTimeout(closeCart, 2500);
   } else {
     messageEl.className = 'form-message form-message--error';
     messageEl.textContent = 'Telegram не настроен. Напишите нам вручную.';
   }
 
   submitBtn.disabled = false;
-  submitBtn.textContent = 'Отправить заказ';
+  submitBtn.textContent = 'Отправить в Telegram';
 }
 
 export function showToast(text) {
@@ -723,7 +776,7 @@ export function renderProductCard(product, { compact = false, editorial = false,
       <div class="product-card__media">
         ${editorial ? '<span class="product-card__blush" aria-hidden="true"></span>' : ''}
         <div class="product-card__image">
-          <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
+          <img src="${product.image}" alt="${product.name} — ${product.categoryLabel} FILO, ${product.volume}" loading="lazy" decoding="async">
           <span class="product-card__category">${product.categoryLabel}</span>
           ${indexHtml}
         </div>
@@ -824,7 +877,10 @@ function initHeroSlider() {
   const captionEl = document.getElementById('heroSliderCaption');
   if (!track) return;
 
-  const slides = products.slice(0, 4);
+  const byCat = ['volume', 'treatment', 'homecare', 'finisher']
+    .map((cat) => products.find((p) => p.category === cat))
+    .filter(Boolean);
+  const slides = byCat.length ? byCat : products.slice(0, 4);
   if (!slides.length) return;
 
   if (totalEl) totalEl.textContent = padSlideIndex(slides.length);
@@ -920,7 +976,10 @@ function initCarousel() {
   const next = document.getElementById('carouselNext');
   if (!track) return;
 
-  track.innerHTML = products.map((p) => renderProductCard(p, { compact: true })).join('');
+  const hits = products.filter((p) => p.featured);
+  track.innerHTML = (hits.length ? hits : products.slice(0, 5))
+    .map((p) => renderProductCard(p, { compact: true }))
+    .join('');
   bindAddToCart(track);
 
   const scroll = (dir) => {
@@ -939,7 +998,7 @@ function initHome() {
       .map(
         (item) => `
       <div class="trust-bar__item">
-        <span class="trust-bar__icon">${item.icon}</span>
+        <span class="trust-bar__rule" aria-hidden="true"></span>
         <div>
           <div class="trust-bar__title">${item.title}</div>
           <div class="trust-bar__text">${item.text}</div>
