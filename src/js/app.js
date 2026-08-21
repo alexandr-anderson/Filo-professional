@@ -4,6 +4,7 @@ import {
   productLines,
   trustItems,
   b2bBenefits,
+  categories,
   formatPrice,
   formatRubles,
   formatCartTotal,
@@ -646,18 +647,39 @@ function updateProductCardButtons() {
   });
 }
 
-export function renderProductCard(product, { compact = false } = {}) {
+export function renderProductCard(product, { compact = false, editorial = false, index = null } = {}) {
   const qty = getItemQty(product.id);
+  const classes = [
+    'product-card',
+    compact ? 'product-card--compact' : '',
+    !compact ? 'product-card--expandable' : '',
+    editorial ? 'product-card--editorial' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const indexHtml =
+    editorial && index != null
+      ? `<span class="product-card__index">${padSlideIndex(index)}</span>`
+      : '';
 
   return `
-    <article class="product-card ${compact ? 'product-card--compact' : 'product-card--expandable'}" data-category="${product.category}" data-id="${product.id}">
-      <div class="product-card__image">
-        <img src="${product.image}" alt="${product.name}" loading="lazy">
-        <span class="product-card__category">${product.categoryLabel}</span>
+    <article class="${classes}" data-category="${product.category}" data-id="${product.id}">
+      <div class="product-card__media">
+        ${editorial ? '<span class="product-card__blush" aria-hidden="true"></span>' : ''}
+        <div class="product-card__image">
+          <img src="${product.image}" alt="${product.name}" loading="lazy">
+          <span class="product-card__category">${product.categoryLabel}</span>
+          ${indexHtml}
+        </div>
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        ${compact ? `<p class="product-card__tagline">${product.tagline}</p>` : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
+        ${
+          compact
+            ? `<p class="product-card__tagline">${product.tagline}</p>`
+            : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Подробнее</span>`
+        }
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice(product)}</span>
@@ -870,39 +892,93 @@ function initHome() {
   initCarousel();
 }
 
+function renderCatalogFilters(activeCat) {
+  const tabs = document.getElementById('filterTabs');
+  if (!tabs) return;
+
+  tabs.innerHTML = categories
+    .map((cat, i) => {
+      const index = cat.id === 'all' ? '' : `<span class="filter-tab__index">${padSlideIndex(i)}</span>`;
+      return `
+        <button
+          type="button"
+          class="filter-tab ${cat.id === activeCat ? 'filter-tab--active' : ''}"
+          data-cat="${cat.id}"
+          role="tab"
+          aria-selected="${cat.id === activeCat ? 'true' : 'false'}"
+        >
+          ${index}
+          <span class="filter-tab__label">${cat.label}</span>
+        </button>`;
+    })
+    .join('');
+}
+
+function updateCatalogRhythm(grid) {
+  if (!grid) return;
+
+  const visible = [...grid.querySelectorAll('.product-card')].filter(
+    (card) => card.style.display !== 'none'
+  );
+
+  visible.forEach((card, i) => {
+    card.classList.toggle('product-card--offset', i % 2 === 1);
+    card.classList.toggle('product-card--chapter', (i + 1) % 5 === 0);
+    const indexEl = card.querySelector('.product-card__index');
+    if (indexEl) indexEl.textContent = padSlideIndex(i + 1);
+  });
+}
+
 function initCatalog() {
   const grid = document.getElementById('catalogProducts');
   const tabs = document.getElementById('filterTabs');
   if (!grid) return;
 
-  grid.innerHTML = products.map((p) => renderProductCard(p)).join('');
-  bindAddToCart(grid);
-  bindProductCardExpand(grid);
-
   const params = new URLSearchParams(window.location.search);
   const initialCat = params.get('cat') || 'all';
+
+  renderCatalogFilters(initialCat);
+
+  grid.innerHTML = products
+    .map((p, i) => renderProductCard(p, { editorial: true, index: i + 1 }))
+    .join('');
+  bindAddToCart(grid);
+  bindProductCardExpand(grid);
   filterProducts(initialCat);
 
   if (tabs) {
-    tabs.querySelectorAll('.filter-tab').forEach((tab) => {
-      if (tab.dataset.cat === initialCat) tab.classList.add('filter-tab--active');
+    tabs.addEventListener('click', (event) => {
+      const tab = event.target.closest('.filter-tab');
+      if (!tab) return;
 
-      tab.addEventListener('click', () => {
-        tabs.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('filter-tab--active'));
-        tab.classList.add('filter-tab--active');
-        filterProducts(tab.dataset.cat);
+      const cat = tab.dataset.cat;
+      tabs.querySelectorAll('.filter-tab').forEach((t) => {
+        const active = t === tab;
+        t.classList.toggle('filter-tab--active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
       });
+
+      filterProducts(cat);
+
+      const url = new URL(window.location.href);
+      if (cat === 'all') url.searchParams.delete('cat');
+      else url.searchParams.set('cat', cat);
+      window.history.replaceState({}, '', url);
     });
   }
 }
 
 function filterProducts(category) {
+  const grid = document.getElementById('catalogProducts');
   let visible = 0;
-  document.querySelectorAll('.product-card').forEach((card) => {
+
+  document.querySelectorAll('#catalogProducts .product-card').forEach((card) => {
     const show = category === 'all' || card.dataset.category === category;
     card.style.display = show ? '' : 'none';
     if (show) visible += 1;
   });
+
+  updateCatalogRhythm(grid);
 
   const countEl = document.getElementById('catalogCount');
   if (countEl) {
