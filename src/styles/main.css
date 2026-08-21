@@ -2087,9 +2087,10 @@ body.nav-open {
     background: var(--color-bg-dark);
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
-    padding: calc(var(--header-height) + 24px) var(--container-padding) 48px;
-    gap: 8px;
+    justify-content: flex-start;
+    padding: calc(var(--header-height) + 32px) var(--container-padding) 48px;
+    gap: 4px;
+    overflow-y: auto;
     border-bottom: none;
     box-shadow: none;
     transform: translateY(0);
@@ -2108,9 +2109,9 @@ body.nav-open {
   }
 
   .nav__link {
-    padding: 14px 0;
+    padding: 12px 0;
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 7vw, 2.75rem);
+    font-size: clamp(1.6rem, 6.5vw, 2.4rem);
     font-weight: 500;
     letter-spacing: var(--tracking-display);
     text-transform: none;
