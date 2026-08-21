@@ -832,11 +832,13 @@ function initHome() {
     b2bEl.innerHTML = b2bBenefits
       .map(
         (item) => `
-      <div class="info-card">
-        <div class="info-card__icon">${item.icon}</div>
-        <h3 class="info-card__title">${item.title}</h3>
-        <p class="info-card__text">${item.text}</p>
-      </div>`
+      <article class="benefit-row">
+        <span class="benefit-row__index" aria-hidden="true">${item.icon}</span>
+        <div class="benefit-row__body">
+          <h3 class="benefit-row__title">${item.title}</h3>
+          <p class="benefit-row__text">${item.text}</p>
+        </div>
+      </article>`
       )
       .join('');
   }
@@ -845,15 +847,19 @@ function initHome() {
   if (categoryGrid) {
     categoryGrid.innerHTML = productLines
       .map(
-        (line) => `
-      <a href="${line.href}" class="category-card">
-        <div class="category-card__image">
-          <img src="${line.image}" alt="${line.title}" loading="lazy">
+        (line, i) => `
+      <a href="${line.href}" class="category-tile">
+        <div class="category-tile__media">
+          <span class="category-tile__blush" aria-hidden="true"></span>
+          <div class="category-tile__frame">
+            <img src="${line.image}" alt="${line.title}" loading="lazy">
+          </div>
+          <span class="category-tile__index">${padSlideIndex(i + 1)}</span>
         </div>
-        <div class="category-card__body">
-          <h3 class="category-card__title">${line.title}</h3>
-          ${line.subtitle ? `<p class="category-card__subtitle">${line.subtitle}</p>` : ''}
-          <span class="category-card__link">Смотреть →</span>
+        <div class="category-tile__body">
+          <h3 class="category-tile__title">${line.title}</h3>
+          ${line.subtitle ? `<p class="category-tile__subtitle">${line.subtitle}</p>` : ''}
+          <span class="category-tile__link">Смотреть</span>
         </div>
       </a>`
       )
