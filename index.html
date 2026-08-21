@@ -16,7 +16,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Piazzolla:ital,opsz,wght@0,8..30,400;0,8..30,500;0,8..30,600;1,8..30,400;1,8..30,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="home">
@@ -24,37 +24,40 @@
   <header class="header"></header>
 
   <main>
-    <section class="hero">
+    <section class="hero" id="hero">
       <div class="container hero__inner">
-        <div class="hero__content">
-          <span class="hero__badge">🇧🇷 Официальный дистрибьютор · для салонов и мастеров</span>
+        <div class="hero__content" data-hero-layer="copy">
+          <p class="hero__kicker">Официальный дистрибьютор · Россия</p>
           <h1 class="hero__title">
-            Профессиональная косметика FILO<br><em>для салонов и мастеров</em>
+            FILO<br><em>для салонов и мастеров</em>
           </h1>
           <p class="hero__text">
-            Линейки для кератинирования, редуктора объёма и восстановления волос.
-            Ингредиенты из Амазонии и нанотехнологии. Поставки из Санкт-Петербурга по всей России.
+            Кератин, редуктор объёма и восстановление — бразильские линейки с поставкой из Санкт-Петербурга по всей России.
           </p>
           <div class="hero__actions">
-            <a href="/catalog.html" class="btn btn--primary">Смотреть каталог</a>
-            <a href="#" data-telegram="price" class="btn btn--secondary">Уточнить цену в Telegram</a>
+            <a href="/catalog.html" class="btn btn--accent">Смотреть каталог</a>
+            <a href="#" data-telegram="price" class="btn btn--ghost-on-dark">Прайс в Telegram</a>
           </div>
-          <div class="hero__features" id="heroFeatures"></div>
         </div>
-        <div class="hero__visual">
-          <div class="hero-slider" id="heroSlider">
+        <div class="hero__visual" data-hero-layer="visual">
+          <div class="hero__blush" data-hero-layer="blush" aria-hidden="true"></div>
+          <div class="hero-slider" id="heroSlider" aria-roledescription="carousel" aria-label="Линейки FILO">
             <div class="hero-slider__track" id="heroSliderTrack"></div>
-            <div class="hero-slider__dots" id="heroSliderDots"></div>
+            <div class="hero-slider__index" id="heroSliderIndex" aria-live="polite">
+              <span class="hero-slider__index-current" id="heroSliderCurrent">01</span>
+              <span class="hero-slider__index-sep" aria-hidden="true">—</span>
+              <span class="hero-slider__index-total" id="heroSliderTotal">04</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="trust-bar">
+    <section class="trust-bar" data-reveal>
       <div class="container trust-bar__inner" id="trustBar"></div>
     </section>
 
-    <section class="section">
+    <section class="section" data-reveal>
       <div class="container">
         <div class="section__header">
           <p class="section__label">Для профессионалов</p>
@@ -70,7 +73,7 @@
       </div>
     </section>
 
-    <section class="section section--alt">
+    <section class="section section--alt" data-reveal>
       <div class="container">
         <div class="section__header">
           <p class="section__label">Линейки</p>
@@ -80,7 +83,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" data-reveal>
       <div class="container">
         <div class="section__header section__header--row">
           <div>
@@ -98,7 +101,7 @@
       </div>
     </section>
 
-    <section class="section about-banner">
+    <section class="section about-banner" data-reveal>
       <div class="container about-banner__inner">
         <div class="about-banner__content">
           <p class="section__label section__label--light">О бренде</p>
@@ -115,7 +118,7 @@
       </div>
     </section>
 
-    <section class="section cta-banner">
+    <section class="section cta-banner" data-reveal>
       <div class="container cta-banner__inner">
         <div class="cta-banner__content">
           <h2 class="cta-banner__title">Подберём линейку под ваш салон</h2>
