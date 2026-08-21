@@ -57,42 +57,45 @@
       <div class="container trust-bar__inner" id="trustBar"></div>
     </section>
 
-    <section class="section" data-reveal>
+    <section class="section section--b2b" data-reveal>
       <div class="container">
-        <div class="section__header">
+        <div class="section__header section__header--editorial">
           <p class="section__label">Для профессионалов</p>
-          <h2 class="section__title">Салоны и частные мастера</h2>
+          <h2 class="section__title">Салоны и <em>частные мастера</em></h2>
           <p class="section__text">
-            Официальный дистрибьютор FILO в России. Расскажите, чем работаете — подскажем, что брать в набор.
+            Официальный дистрибьютор FILO в России. Напишите, чем работаете в кресле — подскажем набор и условия.
           </p>
         </div>
-        <div class="info-cards" id="b2bBenefits"></div>
+        <div class="benefit-list" id="b2bBenefits"></div>
         <div class="b2b-cta">
           <a href="#" data-telegram="price" class="btn btn--primary">Уточнить условия в Telegram</a>
         </div>
       </div>
     </section>
 
-    <section class="section section--alt" data-reveal>
+    <section class="section section--lines" data-reveal>
       <div class="container">
-        <div class="section__header">
-          <p class="section__label">Линейки</p>
-          <h2 class="section__title">Каталог по категориям</h2>
+        <div class="section__header section__header--editorial section__header--split">
+          <div>
+            <p class="section__label">Линейки</p>
+            <h2 class="section__title">Каталог <em>по задачам</em></h2>
+          </div>
+          <a href="/catalog.html" class="section__aside-link">Весь каталог →</a>
         </div>
         <div class="category-grid" id="categoryGrid"></div>
       </div>
     </section>
 
-    <section class="section" data-reveal>
+    <section class="section section--hits" data-reveal>
       <div class="container">
-        <div class="section__header section__header--row">
+        <div class="section__header section__header--editorial section__header--row">
           <div>
-            <p class="section__label">Популярное</p>
-            <h2 class="section__title">Хиты продаж</h2>
+            <p class="section__label">В работе</p>
+            <h2 class="section__title">Хиты <em>для кресла</em></h2>
           </div>
           <div class="carousel-nav">
-            <button class="carousel-nav__btn" id="carouselPrev" aria-label="Назад">←</button>
-            <button class="carousel-nav__btn" id="carouselNext" aria-label="Вперёд">→</button>
+            <button class="carousel-nav__btn" id="carouselPrev" type="button" aria-label="Назад">←</button>
+            <button class="carousel-nav__btn" id="carouselNext" type="button" aria-label="Вперёд">→</button>
           </div>
         </div>
         <div class="carousel" id="featuredCarousel">
@@ -101,34 +104,36 @@
       </div>
     </section>
 
-    <section class="section about-banner" data-reveal>
-      <div class="container about-banner__inner">
-        <div class="about-banner__content">
-          <p class="section__label section__label--light">О бренде</p>
-          <h2 class="about-banner__title">Из Бразилии — для всего мира</h2>
-          <p class="about-banner__text">
-            FILO Professional родилась в 2018 году и уже представлена в более чем 10 странах.
-            Продукты с натуральными ингредиентами и нанотехнологиями для особого ухода за волосами.
+    <section class="about-split" data-reveal>
+      <div class="container about-split__inner">
+        <div class="about-split__content">
+          <p class="section__label section__label--on-ink">О бренде</p>
+          <h2 class="about-split__title">Из Бразилии — <em>для всего мира</em></h2>
+          <p class="about-split__text">
+            FILO Professional — с 2018 года, уже в более чем 10 странах.
+            Натуральные активы и нанотехнологии для протоколов в салоне.
           </p>
-          <a href="/about.html" class="btn btn--white">Узнать больше</a>
+          <a href="/about.html" class="btn btn--ghost-on-dark">Узнать больше</a>
         </div>
-        <div class="about-banner__image">
-          <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy">
+        <div class="about-split__visual">
+          <div class="about-split__blush" aria-hidden="true"></div>
+          <div class="about-split__frame">
+            <img src="/images/hero-brand.png" alt="FILO Professional" loading="lazy">
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section cta-banner" data-reveal>
-      <div class="container cta-banner__inner">
-        <div class="cta-banner__content">
-          <h2 class="cta-banner__title">Подберём линейку под ваш салон</h2>
-          <p class="cta-banner__text">
-            Расскажите о процедурах — подскажем состав заказа, условия поставки и прайс в Telegram.
-          </p>
-        </div>
-        <div class="cta-banner__actions">
-          <a href="/catalog.html" class="btn btn--primary">Смотреть каталог</a>
-          <a href="#" data-telegram="price" class="btn btn--secondary">Написать в Telegram</a>
+    <section class="cta-close" data-reveal>
+      <div class="container cta-close__inner">
+        <p class="section__label">Следующий шаг</p>
+        <h2 class="cta-close__title">Подберём линейку <em>под ваш салон</em></h2>
+        <p class="cta-close__text">
+          Расскажите о процедурах — состав заказа, поставка и прайс в Telegram.
+        </p>
+        <div class="cta-close__actions">
+          <a href="/catalog.html" class="btn btn--accent">Смотреть каталог</a>
+          <a href="#" data-telegram="price" class="btn btn--ghost-on-dark">Написать в Telegram</a>
         </div>
       </div>
     </section>
