@@ -748,12 +748,29 @@ body.nav-open {
 
 .hero__title {
   font-family: var(--font-display);
-  font-size: var(--text-display);
   font-weight: 500;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-display);
   color: var(--color-text-on-dark);
   margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.08em;
+}
+
+.hero__brand {
+  font-size: var(--text-display);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: var(--tracking-display);
+}
+
+.hero__tagline {
+  font-size: clamp(1.65rem, 3.8vw, 2.75rem);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-text-muted-on-dark);
+  max-width: 18ch;
 }
 
 .hero__title em {
@@ -793,18 +810,18 @@ body.nav-open {
   justify-content: center;
   align-items: flex-start;
   min-height: 420px;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1.75rem;
 }
 
 .hero__blush {
   position: absolute;
   width: min(90%, 360px);
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 4.6;
+  max-height: calc(100% - 2.75rem);
   background: var(--color-blush);
   border-radius: var(--radius-lg);
   top: 0;
   left: 50%;
-  /* Меньше пластина + вверх: низ остаётся выше подписи */
   transform: translate(calc(-50% + 22px), -2px) rotate(1.5deg);
   z-index: 0;
   pointer-events: none;
@@ -966,6 +983,15 @@ body.nav-open {
 
 .trust-bar__item:last-child {
   padding-right: 0;
+}
+
+.trust-bar__rule {
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: var(--color-accent);
+  margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
 .trust-bar__icon {
@@ -2482,9 +2508,10 @@ body.nav-open {
 }
 
 .contact-item__icon {
-  width: 48px;
-  height: 48px;
-  background: var(--color-primary-light);
+  width: 52px;
+  height: 52px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -2492,7 +2519,7 @@ body.nav-open {
   font-family: var(--font-display);
   font-weight: 500;
   font-style: italic;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--color-accent);
   flex-shrink: 0;
 }
@@ -3376,8 +3403,17 @@ body.nav-open .cookie-consent {
   }
 
   .hero__visual {
-    order: -1;
+    order: 0;
     min-height: 0;
+  }
+
+  .hero__brand {
+    font-size: clamp(2.75rem, 14vw, 4.5rem);
+  }
+
+  .hero__tagline {
+    font-size: clamp(1.35rem, 5.5vw, 1.85rem);
+    max-width: none;
   }
 
   .hero__visual {
@@ -3390,8 +3426,12 @@ body.nav-open .cookie-consent {
   }
 
   .hero-slider {
-    max-width: 320px;
+    max-width: 280px;
     margin: 0 auto;
+  }
+
+  .hero-slider__track {
+    aspect-ratio: 3 / 4;
   }
 
   .hero-slider__index {

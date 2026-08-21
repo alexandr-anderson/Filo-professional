@@ -939,7 +939,7 @@ function initHome() {
       .map(
         (item) => `
       <div class="trust-bar__item">
-        <span class="trust-bar__icon">${item.icon}</span>
+        <span class="trust-bar__rule" aria-hidden="true"></span>
         <div>
           <div class="trust-bar__title">${item.title}</div>
           <div class="trust-bar__text">${item.text}</div>
