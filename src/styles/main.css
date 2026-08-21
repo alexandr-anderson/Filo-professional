@@ -1495,6 +1495,7 @@ body.nav-open {
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-tight);
   margin-bottom: 20px;
+  color: var(--color-text-on-dark);
 }
 
 .about-split__title em {
@@ -1773,6 +1774,10 @@ body.nav-open {
   border-top: 1px solid var(--color-border-dark);
 }
 
+.cta-close .section__label {
+  color: var(--color-accent-on-ink);
+}
+
 .cta-close__inner {
   max-width: 44rem;
 }
@@ -1784,6 +1789,7 @@ body.nav-open {
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-tight);
   margin-bottom: 16px;
+  color: var(--color-text-on-dark);
 }
 
 .cta-close__title em {
