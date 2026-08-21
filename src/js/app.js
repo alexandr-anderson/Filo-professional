@@ -536,7 +536,7 @@ function updateCartUI() {
           <div class="cart-item__media">
             <span class="cart-item__blush" aria-hidden="true"></span>
             <div class="cart-item__image">
-              <img src="${product.image}" alt="${product.name}" loading="lazy">
+              <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
             </div>
           </div>
           <div class="cart-item__info">
@@ -723,7 +723,7 @@ export function renderProductCard(product, { compact = false, editorial = false,
       <div class="product-card__media">
         ${editorial ? '<span class="product-card__blush" aria-hidden="true"></span>' : ''}
         <div class="product-card__image">
-          <img src="${product.image}" alt="${product.name}" loading="lazy">
+          <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
           <span class="product-card__category">${product.categoryLabel}</span>
           ${indexHtml}
         </div>
@@ -817,6 +817,7 @@ function padSlideIndex(n) {
 }
 
 function initHeroSlider() {
+  const root = document.getElementById('heroSlider');
   const track = document.getElementById('heroSliderTrack');
   const currentEl = document.getElementById('heroSliderCurrent');
   const totalEl = document.getElementById('heroSliderTotal');
@@ -827,13 +828,18 @@ function initHeroSlider() {
   if (!slides.length) return;
 
   if (totalEl) totalEl.textContent = padSlideIndex(slides.length);
+  if (captionEl) captionEl.setAttribute('aria-live', 'polite');
+  if (root) {
+    root.setAttribute('tabindex', '0');
+    root.setAttribute('aria-roledescription', 'carousel');
+  }
 
   track.innerHTML = slides
     .map(
       (p, i) => `
-    <div class="hero-slider__slide ${i === 0 ? 'hero-slider__slide--active' : ''}" data-index="${i}">
+    <div class="hero-slider__slide ${i === 0 ? 'hero-slider__slide--active' : ''}" data-index="${i}" ${i === 0 ? '' : 'aria-hidden="true"'}>
       <div class="hero-slider__frame">
-        <img src="${p.image}" alt="${p.name}" loading="${i === 0 ? 'eager' : 'lazy'}">
+        <img src="${p.image}" alt="${p.name}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async"${i === 0 ? ' fetchpriority="high"' : ''}>
       </div>
     </div>`
     )
@@ -841,11 +847,14 @@ function initHeroSlider() {
 
   let current = 0;
   let timer;
+  let paused = false;
 
   function goTo(index) {
     current = index;
     track.querySelectorAll('.hero-slider__slide').forEach((slide, i) => {
-      slide.classList.toggle('hero-slider__slide--active', i === current);
+      const active = i === current;
+      slide.classList.toggle('hero-slider__slide--active', active);
+      slide.setAttribute('aria-hidden', active ? 'false' : 'true');
     });
     if (currentEl) currentEl.textContent = padSlideIndex(current + 1);
     if (captionEl) captionEl.textContent = slides[current].name;
@@ -855,16 +864,51 @@ function initHeroSlider() {
     goTo((current + 1) % slides.length);
   }
 
+  function prev() {
+    goTo((current - 1 + slides.length) % slides.length);
+  }
+
   function resetTimer() {
     clearInterval(timer);
+    if (paused) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     timer = setInterval(next, 4800);
+  }
+
+  function pause() {
+    paused = true;
+    clearInterval(timer);
+  }
+
+  function resume() {
+    paused = false;
+    resetTimer();
   }
 
   track.addEventListener('click', () => {
     next();
     resetTimer();
   });
+
+  if (root) {
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        next();
+        resetTimer();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+        resetTimer();
+      }
+    });
+    root.addEventListener('mouseenter', pause);
+    root.addEventListener('mouseleave', resume);
+    root.addEventListener('focusin', pause);
+    root.addEventListener('focusout', (e) => {
+      if (!root.contains(e.relatedTarget)) resume();
+    });
+  }
 
   goTo(0);
   resetTimer();
@@ -930,7 +974,7 @@ function initHome() {
         <div class="category-tile__media">
           <span class="category-tile__blush" aria-hidden="true"></span>
           <div class="category-tile__frame">
-            <img src="${line.image}" alt="${line.title}" loading="lazy">
+            <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
           </div>
           <span class="category-tile__index">${padSlideIndex(i + 1)}</span>
         </div>
@@ -1003,23 +1047,48 @@ function initCatalog() {
   filterProducts(initialCat);
 
   if (tabs) {
+    const syncTablist = (activeBtn) => {
+      tabs.querySelectorAll('.filter-tab').forEach((t) => {
+        const active = t === activeBtn;
+        t.classList.toggle('filter-tab--active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+        t.tabIndex = active ? 0 : -1;
+      });
+    };
+
+    tabs.querySelectorAll('.filter-tab').forEach((t) => {
+      t.tabIndex = t.getAttribute('aria-selected') === 'true' ? 0 : -1;
+    });
+
     tabs.addEventListener('click', (event) => {
       const tab = event.target.closest('.filter-tab');
       if (!tab) return;
 
       const cat = tab.dataset.cat;
-      tabs.querySelectorAll('.filter-tab').forEach((t) => {
-        const active = t === tab;
-        t.classList.toggle('filter-tab--active', active);
-        t.setAttribute('aria-selected', active ? 'true' : 'false');
-      });
-
+      syncTablist(tab);
       filterProducts(cat);
 
       const url = new URL(window.location.href);
       if (cat === 'all') url.searchParams.delete('cat');
       else url.searchParams.set('cat', cat);
       window.history.replaceState({}, '', url);
+    });
+
+    tabs.addEventListener('keydown', (event) => {
+      const list = [...tabs.querySelectorAll('.filter-tab')];
+      const i = list.indexOf(document.activeElement);
+      if (i < 0) return;
+
+      let next = -1;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % list.length;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i - 1 + list.length) % list.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = list.length - 1;
+      else return;
+
+      event.preventDefault();
+      list[next].focus();
+      list[next].click();
     });
   }
 }

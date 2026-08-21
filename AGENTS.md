@@ -37,3 +37,9 @@
 - Не копируй чужие ассеты и код; перенимай приёмы (ритм, иерархия, тип motion).
 - GenerateImage — moodboard и «как мог бы выглядеть блок», не подмена скриншотов чужих сайтов.
 - Якоря moodboard: ElmTree, Davines World/US, scroll-showcase (Pinterest).
+
+### Фазы внедрения (зафиксировано)
+
+1–8: tokens → header → hero/motion → home → catalog → cart/footer → scroll-story.
+9: perf/a11y — skip-link, focus-visible, content-visibility на below-fold, decoding/fetchpriority, клавиатура hero/фильтров, aria story; без parallax при `prefers-reduced-motion` / coarse pointer.
+
