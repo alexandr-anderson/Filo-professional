@@ -1,8 +1,6 @@
-import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.7/+esm';
-import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.7/ScrollTrigger/+esm';
-import Lenis from 'https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/+esm';
-
-gsap.registerPlugin(ScrollTrigger);
+let gsap = null;
+let ScrollTrigger = null;
+let Lenis = null;
 
 let lenisInstance = null;
 
@@ -14,8 +12,29 @@ function isFinePointer() {
   return window.matchMedia('(pointer: fine)').matches;
 }
 
+async function loadMotionLibs() {
+  if (gsap && ScrollTrigger && Lenis) return true;
+
+  try {
+    const [gsapMod, stMod, lenisMod] = await Promise.all([
+      import('https://cdn.jsdelivr.net/npm/gsap@3.12.7/+esm'),
+      import('https://cdn.jsdelivr.net/npm/gsap@3.12.7/ScrollTrigger/+esm'),
+      import('https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/+esm'),
+    ]);
+
+    gsap = gsapMod.default || gsapMod.gsap || gsapMod;
+    ScrollTrigger = stMod.ScrollTrigger || stMod.default;
+    Lenis = lenisMod.default || lenisMod.Lenis || lenisMod;
+    gsap.registerPlugin(ScrollTrigger);
+    return true;
+  } catch (err) {
+    console.warn('[motion] libs unavailable', err);
+    return false;
+  }
+}
+
 function initLenis() {
-  if (prefersReducedMotion() || !isFinePointer()) return null;
+  if (!Lenis || prefersReducedMotion() || !isFinePointer()) return null;
 
   const lenis = new Lenis({
     lerp: 0.085,
@@ -36,7 +55,7 @@ function initLenis() {
 
 function initHeroParallax() {
   const hero = document.getElementById('hero');
-  if (!hero || prefersReducedMotion() || !isFinePointer()) return;
+  if (!hero || !gsap || prefersReducedMotion() || !isFinePointer()) return;
 
   const copy = hero.querySelector('[data-hero-layer="copy"]');
   const visual = hero.querySelector('[data-hero-layer="visual"]');
@@ -89,8 +108,8 @@ function initHeroParallax() {
   });
 }
 
-export function initReveal() {
-  if (prefersReducedMotion()) return;
+function initReveal() {
+  if (!gsap || prefersReducedMotion()) return;
 
   const items = document.querySelectorAll('[data-reveal]');
   if (!items.length) return;
@@ -120,7 +139,10 @@ export function initReveal() {
   });
 }
 
-export function initMotion() {
+export async function initMotion() {
+  const ok = await loadMotionLibs();
+  if (!ok) return;
+
   initLenis();
   initHeroParallax();
   initReveal();

@@ -1,7 +1,9 @@
 import { initApp } from './js/app.js';
-import { initMotion } from './js/motion.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
-  initMotion();
+
+  import('./js/motion.js')
+    .then(({ initMotion }) => initMotion())
+    .catch((err) => console.warn('[motion] module failed', err));
 });
