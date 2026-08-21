@@ -24,29 +24,32 @@
   <header class="header"></header>
 
   <main>
-    <div class="catalog-header">
-      <div class="container">
-        <h1 class="catalog-header__title">Каталог для салонов и мастеров</h1>
-        <p class="catalog-header__text">
-          Линейки для кератинирования, редуктора объёма, восстановления и home care для клиентов.
-          Цены на ключевые позиции в каталоге. Остальной прайс — в Telegram.
+    <header class="catalog-intro">
+      <div class="container catalog-intro__inner">
+        <p class="section__label">Каталог</p>
+        <h1 class="catalog-intro__title">FILO <em>для кресла</em></h1>
+        <p class="catalog-intro__text">
+          Редуктор, лечение, home care и финиш — позиции под салонные протоколы.
+          Цены на ключевые позиции здесь, остальной прайс — в Telegram.
         </p>
-      </div>
-    </div>
-
-    <section class="section section--catalog">
-      <div class="container">
-        <div class="catalog-toolbar">
-          <div class="filter-tabs" id="filterTabs">
-            <button class="filter-tab" data-cat="all">Все товары</button>
-            <button class="filter-tab" data-cat="volume">Редуктор объёма</button>
-            <button class="filter-tab" data-cat="treatment">Лечение</button>
-            <button class="filter-tab" data-cat="homecare">Home Care</button>
-            <button class="filter-tab" data-cat="finisher">Финиш</button>
-          </div>
-          <span class="catalog-toolbar__count" id="catalogCount"></span>
+        <div class="catalog-intro__actions">
+          <a href="#" data-telegram="price" class="btn btn--primary">Прайс в Telegram</a>
         </div>
-        <div class="products-grid products-grid--catalog" id="catalogProducts"></div>
+      </div>
+    </header>
+
+    <section class="section section--catalog" data-reveal>
+      <div class="container catalog-layout">
+        <aside class="catalog-filters" aria-label="Фильтр по линейкам">
+          <p class="catalog-filters__label">Линейки</p>
+          <div class="filter-tabs" id="filterTabs" role="tablist"></div>
+        </aside>
+        <div class="catalog-main">
+          <div class="catalog-toolbar">
+            <span class="catalog-toolbar__count" id="catalogCount"></span>
+          </div>
+          <div class="products-grid products-grid--catalog" id="catalogProducts"></div>
+        </div>
       </div>
     </section>
   </main>

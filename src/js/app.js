@@ -4,6 +4,7 @@ import {
   productLines,
   trustItems,
   b2bBenefits,
+  categories,
   formatPrice,
   formatRubles,
   formatCartTotal,
@@ -164,37 +165,39 @@ function renderFooter() {
 
   footer.innerHTML = `
     <div class="container">
-      <div class="footer__grid">
-        <div>
-          <div class="footer__brand">FILO <span>Professional</span></div>
+      <div class="footer__top">
+        <div class="footer__brand-block">
+          <a href="/" class="footer__brand">FILO <span>Professional</span></a>
           <p class="footer__desc">
-            Официальный дистрибьютор профессиональной косметики ${BRAND_NAME} в России.
-            Санкт-Петербург · Доставка по всей России.
+            Официальный дистрибьютор ${BRAND_NAME} в России.
+            Санкт-Петербург · поставки по всей стране.
           </p>
+          <a href="#" data-telegram="price" class="btn btn--ghost-on-dark btn--sm footer__cta">Прайс в Telegram</a>
         </div>
-        <div>
-          <div class="footer__title">Навигация</div>
-          <ul class="footer__links">
-            <li><a href="/">Главная</a></li>
-            <li><a href="/catalog.html">Каталог</a></li>
-            <li><a href="/delivery.html">Доставка</a></li>
-            <li><a href="/about.html">О нас и контакты</a></li>
-            <li><a href="/privacy.html">Политика конфиденциальности</a></li>
-          </ul>
-        </div>
-        <div>
-          <div class="footer__title">Контакты</div>
-          <ul class="footer__links">
-            <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
-            <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
-            <li>Санкт-Петербург</li>
-          </ul>
+        <div class="footer__cols">
+          <div class="footer__col">
+            <div class="footer__title">Навигация</div>
+            <ul class="footer__links">
+              <li><a href="/">Главная</a></li>
+              <li><a href="/catalog.html">Каталог</a></li>
+              <li><a href="/delivery.html">Доставка</a></li>
+              <li><a href="/about.html">О нас</a></li>
+            </ul>
+          </div>
+          <div class="footer__col">
+            <div class="footer__title">Контакты</div>
+            <ul class="footer__links">
+              <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
+              <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
+              <li>Санкт-Петербург</li>
+            </ul>
+          </div>
         </div>
       </div>
       <div class="footer__bottom">
-        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia. Официальный дистрибьютор.</span>
+        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia</span>
         <a href="/privacy.html" class="footer__legal">Политика конфиденциальности</a>
-        <span>filoprofessional.com.br</span>
+        <a href="https://filoprofessional.com.br" class="footer__legal" target="_blank" rel="noopener">filoprofessional.com.br</a>
       </div>
     </div>
   `;
@@ -316,8 +319,30 @@ function initCart() {
   document.getElementById('checkoutForm')?.addEventListener('submit', handleOrderSubmit);
   document.getElementById('needsDelivery')?.addEventListener('change', toggleDeliveryFields);
   toggleDeliveryFields();
-
   updateCartUI();
+
+  document.addEventListener('keydown', (event) => {
+    const sidebar = document.getElementById('cartSidebar');
+    if (!sidebar?.classList.contains('cart-sidebar--open')) return;
+
+    if (event.key === 'Escape') {
+      closeCart();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+    const focusable = getCartFocusable();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
 }
 
 function toggleDeliveryFields() {
@@ -332,21 +357,27 @@ function injectCartUI() {
 
   const html = `
     <div class="cart-overlay" id="cartOverlay"></div>
-    <div class="cart-sidebar" id="cartSidebar">
+    <aside class="cart-sidebar" id="cartSidebar" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
       <div class="cart-sidebar__header">
-        <h2 class="cart-sidebar__title">Корзина</h2>
-        <button class="cart-sidebar__close" id="cartClose" aria-label="Закрыть">×</button>
+        <div>
+          <p class="cart-sidebar__kicker">Заказ</p>
+          <h2 class="cart-sidebar__title" id="cartTitle">Корзина</h2>
+        </div>
+        <button class="cart-sidebar__close" id="cartClose" type="button" aria-label="Закрыть корзину">
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
       <div class="cart-sidebar__items cart-items-view" id="cartItems"></div>
       <form class="checkout-form" id="checkoutForm">
         <button type="button" class="form-back" id="backToCart">← Назад к корзине</button>
+        <p class="checkout-form__lead">Оставим контакты — заказ уйдёт в Telegram.</p>
         <div class="form-group">
           <label for="customerName">Имя *</label>
-          <input type="text" id="customerName" name="name" required placeholder="Ваше имя">
+          <input type="text" id="customerName" name="name" required autocomplete="name" placeholder="Как к вам обращаться">
         </div>
         <div class="form-group">
           <label for="customerPhone">Телефон *</label>
-          <input type="tel" id="customerPhone" name="phone" required placeholder="+7 (___) ___-__-__">
+          <input type="tel" id="customerPhone" name="phone" required autocomplete="tel" placeholder="+7 (___) ___-__-__">
         </div>
         <div class="form-group">
           <label class="form-checkbox">
@@ -367,39 +398,57 @@ function injectCartUI() {
           </div>
           <div class="form-group">
             <label for="customerAddress">Адрес доставки</label>
-            <textarea id="customerAddress" name="address" placeholder="Можете указать адрес сейчас или уточнить менеджеру в Telegram после консультации"></textarea>
+            <textarea id="customerAddress" name="address" placeholder="Адрес сейчас или уточните менеджеру в Telegram"></textarea>
           </div>
         </div>
         <div class="form-message" id="formMessage"></div>
-        <button type="submit" class="btn btn--primary btn--full" id="submitOrder">Отправить заказ</button>
+        <button type="submit" class="btn btn--accent btn--full" id="submitOrder">Отправить в Telegram</button>
       </form>
       <div class="cart-sidebar__footer" id="cartFooter">
         <div class="cart-sidebar__total">
-          <span>Итого:</span>
+          <span class="cart-sidebar__total-label">Итого</span>
           <span class="cart-sidebar__total-value" id="cartTotal">${PRICE_LABEL}</span>
         </div>
         <p class="cart-sidebar__price-hint" id="cartPriceHint">${PRICE_HINT}</p>
-        <button class="btn btn--primary btn--full" id="checkoutBtn">Оформить заказ</button>
+        <button class="btn btn--accent btn--full" id="checkoutBtn" type="button">Оформить заказ</button>
       </div>
-    </div>
-    <div class="toast" id="toast"></div>
+    </aside>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   `;
 
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
+function getCartFocusable() {
+  const sidebar = document.getElementById('cartSidebar');
+  if (!sidebar) return [];
+  return [...sidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(
+    (el) => el.offsetParent !== null || el === document.activeElement
+  );
+}
+
 function openCart() {
   updateCartUI();
+  const sidebar = document.getElementById('cartSidebar');
   document.getElementById('cartOverlay')?.classList.add('cart-overlay--open');
-  document.getElementById('cartSidebar')?.classList.add('cart-sidebar--open');
+  sidebar?.classList.add('cart-sidebar--open');
+  sidebar?.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('cart-open');
   document.body.style.overflow = 'hidden';
   hideCheckout();
+  window.requestAnimationFrame(() => {
+    document.getElementById('cartClose')?.focus();
+  });
 }
 
 function closeCart() {
+  const sidebar = document.getElementById('cartSidebar');
   document.getElementById('cartOverlay')?.classList.remove('cart-overlay--open');
-  document.getElementById('cartSidebar')?.classList.remove('cart-sidebar--open');
+  sidebar?.classList.remove('cart-sidebar--open');
+  sidebar?.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('cart-open');
   document.body.style.overflow = '';
+  document.getElementById('cartBtn')?.focus();
 }
 
 function showCheckout() {
@@ -470,31 +519,38 @@ function updateCartUI() {
   if (cart.length === 0) {
     itemsEl.innerHTML = `
       <div class="cart-empty">
-        <p>Корзина пуста</p>
-        <a href="/catalog.html" class="btn btn--secondary btn--sm" style="margin-top:16px">Перейти в каталог</a>
+        <p class="cart-empty__title">Пока пусто</p>
+        <p class="cart-empty__text">Добавьте линейки из каталога — оформим заказ в Telegram.</p>
+        <a href="/catalog.html" class="btn btn--primary btn--sm cart-empty__cta">Смотреть каталог</a>
       </div>
     `;
     return;
   }
 
   itemsEl.innerHTML = cart
-    .map((item) => {
+    .map((item, i) => {
       const product = products.find((p) => p.id === item.id);
       if (!product) return '';
       return `
         <div class="cart-item" data-id="${item.id}">
-          <div class="cart-item__image">
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
+          <div class="cart-item__media">
+            <span class="cart-item__blush" aria-hidden="true"></span>
+            <div class="cart-item__image">
+              <img src="${product.image}" alt="${product.name}" loading="lazy">
+            </div>
           </div>
           <div class="cart-item__info">
+            <div class="cart-item__top">
+              <span class="cart-item__index">${padSlideIndex(i + 1)}</span>
+              <button class="cart-item__remove" data-action="remove" data-id="${item.id}" type="button">Удалить</button>
+            </div>
             <div class="cart-item__name">${product.name}</div>
             <div class="cart-item__price">${formatPrice(product)}${item.qty > 1 ? ` × ${item.qty}` : ''}</div>
             <div class="cart-item__qty">
-              <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}">−</button>
+              <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}" type="button" aria-label="Уменьшить">−</button>
               <span class="cart-item__qty-value">${item.qty}</span>
-              <button class="cart-item__qty-btn" data-action="increase" data-id="${item.id}">+</button>
+              <button class="cart-item__qty-btn" data-action="increase" data-id="${item.id}" type="button" aria-label="Увеличить">+</button>
             </div>
-            <button class="cart-item__remove" data-action="remove" data-id="${item.id}">Удалить</button>
           </div>
         </div>
       `;
@@ -528,26 +584,26 @@ function buildOrderMessage(formData) {
   });
 
   const { total, hasPriced, hasUnpriced } = getCartPricing(cart);
-  let costLine = '💰 Стоимость: цена по запросу — прайс в Telegram';
+  let costLine = 'Стоимость: цена по запросу — прайс в Telegram';
   if (hasPriced) {
     costLine = hasUnpriced
-      ? `💰 Итого по позициям с ценой: ${formatRubles(total)} (остальное — уточним в Telegram)`
-      : `💰 Итого: ${formatRubles(total)}`;
+      ? `Итого по позициям с ценой: ${formatRubles(total)} (остальное — уточним в Telegram)`
+      : `Итого: ${formatRubles(total)}`;
   }
 
   return [
-    '🛍 Новый заказ FILO Professional',
+    'Новый заказ FILO Professional',
     '',
-    '📦 Товары:',
+    'Товары:',
     ...lines,
     '',
     costLine,
     '',
-    '👤 Клиент:',
+    'Клиент:',
     `Имя: ${formData.name}`,
     `Телефон: ${formData.phone}`,
     '',
-    '🚚 Доставка:',
+    'Доставка:',
     formData.needsDelivery
       ? [
           formData.delivery ? `Способ: ${formData.delivery}` : 'Способ: уточнить в Telegram',
@@ -646,18 +702,39 @@ function updateProductCardButtons() {
   });
 }
 
-export function renderProductCard(product, { compact = false } = {}) {
+export function renderProductCard(product, { compact = false, editorial = false, index = null } = {}) {
   const qty = getItemQty(product.id);
+  const classes = [
+    'product-card',
+    compact ? 'product-card--compact' : '',
+    !compact ? 'product-card--expandable' : '',
+    editorial ? 'product-card--editorial' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const indexHtml =
+    editorial && index != null
+      ? `<span class="product-card__index">${padSlideIndex(index)}</span>`
+      : '';
 
   return `
-    <article class="product-card ${compact ? 'product-card--compact' : 'product-card--expandable'}" data-category="${product.category}" data-id="${product.id}">
-      <div class="product-card__image">
-        <img src="${product.image}" alt="${product.name}" loading="lazy">
-        <span class="product-card__category">${product.categoryLabel}</span>
+    <article class="${classes}" data-category="${product.category}" data-id="${product.id}">
+      <div class="product-card__media">
+        ${editorial ? '<span class="product-card__blush" aria-hidden="true"></span>' : ''}
+        <div class="product-card__image">
+          <img src="${product.image}" alt="${product.name}" loading="lazy">
+          <span class="product-card__category">${product.categoryLabel}</span>
+          ${indexHtml}
+        </div>
       </div>
       <div class="product-card__body">
         <h3 class="product-card__name">${product.name}</h3>
-        ${compact ? `<p class="product-card__tagline">${product.tagline}</p>` : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Нажмите, чтобы прочитать полностью</span>`}
+        ${
+          compact
+            ? `<p class="product-card__tagline">${product.tagline}</p>`
+            : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Подробнее</span>`
+        }
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice(product)}</span>
@@ -870,39 +947,93 @@ function initHome() {
   initCarousel();
 }
 
+function renderCatalogFilters(activeCat) {
+  const tabs = document.getElementById('filterTabs');
+  if (!tabs) return;
+
+  tabs.innerHTML = categories
+    .map((cat, i) => {
+      const index = cat.id === 'all' ? '' : `<span class="filter-tab__index">${padSlideIndex(i)}</span>`;
+      return `
+        <button
+          type="button"
+          class="filter-tab ${cat.id === activeCat ? 'filter-tab--active' : ''}"
+          data-cat="${cat.id}"
+          role="tab"
+          aria-selected="${cat.id === activeCat ? 'true' : 'false'}"
+        >
+          ${index}
+          <span class="filter-tab__label">${cat.label}</span>
+        </button>`;
+    })
+    .join('');
+}
+
+function updateCatalogRhythm(grid) {
+  if (!grid) return;
+
+  const visible = [...grid.querySelectorAll('.product-card')].filter(
+    (card) => card.style.display !== 'none'
+  );
+
+  visible.forEach((card, i) => {
+    card.classList.toggle('product-card--offset', i % 2 === 1);
+    card.classList.toggle('product-card--chapter', (i + 1) % 5 === 0);
+    const indexEl = card.querySelector('.product-card__index');
+    if (indexEl) indexEl.textContent = padSlideIndex(i + 1);
+  });
+}
+
 function initCatalog() {
   const grid = document.getElementById('catalogProducts');
   const tabs = document.getElementById('filterTabs');
   if (!grid) return;
 
-  grid.innerHTML = products.map((p) => renderProductCard(p)).join('');
-  bindAddToCart(grid);
-  bindProductCardExpand(grid);
-
   const params = new URLSearchParams(window.location.search);
   const initialCat = params.get('cat') || 'all';
+
+  renderCatalogFilters(initialCat);
+
+  grid.innerHTML = products
+    .map((p, i) => renderProductCard(p, { editorial: true, index: i + 1 }))
+    .join('');
+  bindAddToCart(grid);
+  bindProductCardExpand(grid);
   filterProducts(initialCat);
 
   if (tabs) {
-    tabs.querySelectorAll('.filter-tab').forEach((tab) => {
-      if (tab.dataset.cat === initialCat) tab.classList.add('filter-tab--active');
+    tabs.addEventListener('click', (event) => {
+      const tab = event.target.closest('.filter-tab');
+      if (!tab) return;
 
-      tab.addEventListener('click', () => {
-        tabs.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('filter-tab--active'));
-        tab.classList.add('filter-tab--active');
-        filterProducts(tab.dataset.cat);
+      const cat = tab.dataset.cat;
+      tabs.querySelectorAll('.filter-tab').forEach((t) => {
+        const active = t === tab;
+        t.classList.toggle('filter-tab--active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
       });
+
+      filterProducts(cat);
+
+      const url = new URL(window.location.href);
+      if (cat === 'all') url.searchParams.delete('cat');
+      else url.searchParams.set('cat', cat);
+      window.history.replaceState({}, '', url);
     });
   }
 }
 
 function filterProducts(category) {
+  const grid = document.getElementById('catalogProducts');
   let visible = 0;
-  document.querySelectorAll('.product-card').forEach((card) => {
+
+  document.querySelectorAll('#catalogProducts .product-card').forEach((card) => {
     const show = category === 'all' || card.dataset.category === category;
     card.style.display = show ? '' : 'none';
     if (show) visible += 1;
   });
+
+  updateCatalogRhythm(grid);
 
   const countEl = document.getElementById('catalogCount');
   if (countEl) {

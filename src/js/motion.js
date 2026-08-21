@@ -139,13 +139,92 @@ function initReveal() {
   });
 }
 
+function padStoryIndex(n) {
+  return String(n).padStart(2, '0');
+}
+
+function setStoryChapter(index) {
+  const chapters = document.querySelectorAll('[data-story-chapter]');
+  const frames = document.querySelectorAll('[data-story-frame]');
+  const progress = document.getElementById('storyProgressCurrent');
+  if (!chapters.length) return;
+
+  const safe = Math.max(0, Math.min(index, chapters.length - 1));
+
+  chapters.forEach((el, i) => {
+    el.classList.toggle('is-active', i === safe);
+  });
+  frames.forEach((el, i) => {
+    el.classList.toggle('is-active', i === safe);
+  });
+  if (progress) progress.textContent = padStoryIndex(safe + 1);
+}
+
+function initStoryScroll() {
+  const story = document.getElementById('story');
+  if (!story) return;
+
+  const chapters = [...story.querySelectorAll('[data-story-chapter]')];
+  if (!chapters.length) return;
+
+  setStoryChapter(0);
+
+  if (!gsap || prefersReducedMotion() || !isFinePointer()) {
+    story.classList.add('story--static');
+    return;
+  }
+
+  const mm = gsap.matchMedia();
+  mm.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+    story.classList.remove('story--static');
+    story.classList.add('story--pinned');
+
+    const pin = story.querySelector('.story__pin');
+    const track = story.querySelector('.story__track');
+    if (!pin || !track) return;
+
+    const steps = chapters.length;
+    const st = ScrollTrigger.create({
+      trigger: track,
+      start: 'top top',
+      end: () => `+=${Math.max(window.innerHeight * (steps - 0.15), window.innerHeight)}`,
+      pin: pin,
+      scrub: 0.45,
+      anticipatePin: 1,
+      onUpdate: (self) => {
+        const idx = Math.min(steps - 1, Math.floor(self.progress * steps));
+        setStoryChapter(idx);
+      },
+    });
+
+    return () => {
+      st.kill();
+      story.classList.remove('story--pinned');
+      setStoryChapter(0);
+    };
+  });
+
+  mm.add('(max-width: 900px), (prefers-reduced-motion: reduce)', () => {
+    story.classList.add('story--static');
+    story.classList.remove('story--pinned');
+    chapters.forEach((el) => el.classList.add('is-active'));
+    story.querySelectorAll('[data-story-frame]').forEach((el, i) => {
+      el.classList.toggle('is-active', i === 0);
+    });
+  });
+}
+
 export async function initMotion() {
   const ok = await loadMotionLibs();
-  if (!ok) return;
+  if (!ok) {
+    document.getElementById('story')?.classList.add('story--static');
+    return;
+  }
 
   initLenis();
   initHeroParallax();
   initReveal();
+  initStoryScroll();
 }
 
 export function getLenis() {
