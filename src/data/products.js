@@ -1,6 +1,7 @@
 export const products = [
   {
     id: 'cafe-brasil',
+    featured: true,
     name: 'Café Verde',
     category: 'volume',
     categoryLabel: 'Редуктор объёма',
@@ -10,10 +11,11 @@ export const products = [
       'Редуктор объёма с маслом зелёного кофе — убирает пушистость, укрощает густые непослушные волосы. Берут перед выпрямлением, когда нужно снять объём и полотно легло ровнее.',
     tagline: 'Редуктор на зелёном кофе — перед выпрямлением',
     line: 'Café Brasil Lisoriance',
-    image: '/images/products/cafe-verde.png',
+    image: '/images/products/cafe-verde.webp',
   },
   {
     id: 'ultra-fast',
+    featured: true,
     name: 'Ultra Fast Keratin',
     category: 'volume',
     categoryLabel: 'Редуктор объёма',
@@ -23,7 +25,7 @@ export const products = [
       'Быстрый редуктор объёма с кератином, маслом бабасу и биотином — реструктурирует и выравнивает полотно. Когда нужен результат за один сеанс без лишней паузы в кресле.',
     tagline: 'Быстрое выпрямление и редуктор в одном флаконе',
     line: 'Ultra Fast Keratin',
-    image: '/images/products/ultra-fast.png',
+    image: '/images/products/ultra-fast.webp',
   },
   {
     id: 'apricot',
@@ -36,7 +38,7 @@ export const products = [
       'Nanolisoriance на абрикосе — редуктор и восстановление с мягким воздействием на полотно. Хороший вариант, когда нужен баланс между выпрямлением и уходом.',
     tagline: 'Мягкий редуктор с абрикосовыми активами',
     line: 'Apricot Nanolisoriance',
-    image: '/images/products/apricot.png',
+    image: '/images/products/apricot.webp',
   },
   {
     id: 'bio-tannin',
@@ -49,10 +51,11 @@ export const products = [
       'Танинопластика на дубильных компонентах — альтернатива кератину для выпрямления и реконструкции. Берут, когда клиент хочет танин, а не классический кератин.',
     tagline: 'Танинопластика вместо кератина',
     line: 'Biotannin',
-    image: '/images/products/bio-tannin.png',
+    image: '/images/products/bio-tannin.webp',
   },
   {
     id: 'bamboo-therapy',
+    featured: true,
     name: 'Bamboo Thérapie',
     category: 'treatment',
     categoryLabel: 'Лечение',
@@ -62,7 +65,7 @@ export const products = [
       'Липидная маска на бамбуке — глубокое питание и восстановление массы волос после осветления, химии и редукторов. Часто идёт на финиш после кератина или между процедурами.',
     tagline: 'Липидка — восстановление массы волос',
     line: 'Bamboo Thérapie',
-    image: '/images/products/bamboo-therapy.png',
+    image: '/images/products/bamboo-therapy.webp',
   },
   {
     id: 'bio-btx-reducer',
@@ -74,7 +77,7 @@ export const products = [
       'Редуктор с наночастицами — и на объём, и на восстановление в одном флаконе. Часто берут к кератину и ботоксу, когда волосы ослаблены и их нужно подтянуть до утюжка.',
     tagline: 'К кератину и ботоксу, когда волосы слабые',
     line: 'Redutor de Volume',
-    image: '/images/products/bio-btx-reducer.png',
+    image: '/images/products/bio-btx-reducer.webp',
   },
   {
     id: 'nano-btx-platinum',
@@ -86,10 +89,11 @@ export const products = [
       'Лечебная линия для ломких и химически уставших волос — даёт плотность и блеск. Когда нужен ботокс или восстановление, а не жёсткое выпрямление в ноль.',
     tagline: 'Восстановление без выпрямления в ноль',
     line: 'Tratamento',
-    image: '/images/products/nano-btx-platinum.jpg',
+    image: '/images/products/nano-btx-platinum.webp',
   },
   {
     id: 'splendor-oil',
+    featured: true,
     name: 'Splendor Oil',
     category: 'finisher',
     categoryLabel: 'Финиш',
@@ -98,10 +102,11 @@ export const products = [
       'Масло на финиш — после кератина или ботокса, на укладку и термозащиту. Блеск без липкости, масла из Амазонии.',
     tagline: 'Финиш после кератина и ботокса',
     line: 'Finalizadores',
-    image: '/images/products/splendor-oil.png',
+    image: '/images/products/splendor-oil.webp',
   },
   {
     id: 'kit-hydrat-therapy',
+    featured: true,
     name: 'Kit Hydrat Therapy',
     category: 'homecare',
     categoryLabel: 'Home Care',
@@ -110,7 +115,7 @@ export const products = [
       'Home care на три продукта: шампунь, кондиционер, маска. Удобно отдавать клиенту после увлажняющей процедуры — продлить эффект дома.',
     tagline: 'Home care клиенту после процедуры',
     line: 'Home Care',
-    image: '/images/products/kit-hydrat-therapy.png',
+    image: '/images/products/kit-hydrat-therapy.webp',
   },
 ];
 
@@ -136,28 +141,28 @@ export const productLines = [
     title: 'Редуктор объёма',
     subtitle: 'Кератин, ботокс, выпрямление',
     href: '/catalog.html?cat=volume',
-    image: '/images/categories/volume.png',
+    image: '/images/categories/volume.webp',
   },
   {
     id: 'treatment',
     title: 'Лечение',
     subtitle: 'Восстановление и реконструкция',
     href: '/catalog.html?cat=treatment',
-    image: '/images/categories/treatment.png',
+    image: '/images/categories/treatment.webp',
   },
   {
     id: 'homecare',
     title: 'Home Care',
     subtitle: 'Для продажи клиентам после процедуры',
     href: '/catalog.html?cat=homecare',
-    image: '/images/categories/homecare.png',
+    image: '/images/categories/homecare.webp',
   },
   {
     id: 'finisher',
     title: 'Финиш',
     subtitle: 'На финиш и укладку',
     href: '/catalog.html?cat=finisher',
-    image: '/images/categories/finisher.png',
+    image: '/images/categories/finisher.webp',
   },
 ];
 
@@ -182,7 +187,7 @@ export const b2bBenefits = [
 export const trustItems = [
   { icon: '01', title: 'Доставка по РФ', text: 'СДЭК, Почта, Boxberry' },
   { icon: '02', title: 'Консультация', text: 'Подскажем по кератину, ботоксу и редуктору' },
-  { icon: '03', title: 'Оплата', text: 'После согласования заказа' },
+  { icon: '03', title: 'Оплата', text: 'Перевод или счёт для юрлиц' },
 ];
 
 export const PRICE_LABEL = 'Цена по запросу';
