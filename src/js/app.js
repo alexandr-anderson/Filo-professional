@@ -70,25 +70,28 @@ function renderSiteBar() {
   if (!bar) return;
 
   const count = getCartCount();
-  const links = [
+  const navLinks = [
+    { href: '/about.html', label: 'О бренде', page: 'about' },
+    { href: '/delivery.html', label: 'Доставка', page: 'delivery' },
     { href: '/catalog.html', label: 'Каталог', page: 'catalog' },
     { href: '/order.html', label: `Заказ (${count})`, page: 'order' },
   ];
 
   bar.innerHTML = `
-    <div class="container site-bar__inner">
+    <div class="site-bar__inner">
       <a href="/" class="site-bar__brand">FILO Professional</a>
-      <span class="site-bar__meta">СПб · <a href="${getTelegramUrl()}" target="_blank" rel="noopener">@${TELEGRAM_USERNAME}</a></span>
+      <p class="site-bar__claim">Дистрибьютор профессионального ухода для волос из Бразилии</p>
       <nav class="site-bar__nav" id="siteNav" aria-label="Основная навигация">
-        ${links
+        ${navLinks
           .map(
             (l) =>
               `<a href="${l.href}" class="site-bar__link ${currentPage === l.page ? 'site-bar__link--active' : ''}">${l.label}</a>`
           )
           .join('')}
+        <a href="${getTelegramUrl()}" class="site-bar__link site-bar__link--tg" target="_blank" rel="noopener">Telegram</a>
       </nav>
       <button class="menu-toggle" id="menuToggle" type="button" aria-label="Меню" aria-expanded="false" aria-controls="siteNav">
-        <span></span><span></span><span></span>
+        <span></span><span></span>
       </button>
     </div>
   `;
@@ -235,8 +238,12 @@ function initHome() {
       .join('');
   }
 
+  document.querySelectorAll('.hero-atelier__product').forEach((el) => {
+    el.classList.add('is-visible');
+  });
+
   const heroVisual = document.getElementById('heroVisual');
-  heroVisual?.classList.add('is-revealed');
+  heroVisual?.classList.add('is-ready');
 }
 
 function renderShelfCell(product) {

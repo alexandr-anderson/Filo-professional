@@ -1,4 +1,4 @@
-/** Glaze atelier motion — hero sheen, parallax, scroll reveal */
+/** Glaze atelier — editorial grid motion */
 
 export function initMotion() {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -9,19 +9,19 @@ export function initMotion() {
       'mousemove',
       (e) => {
         const rect = hero.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
-        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 5;
-        const wrap = hero.querySelector('.hero-kiln__product-wrap');
-        if (wrap) {
-          wrap.style.transform = `translate(${x}px, ${y}px)`;
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 4;
+        const products = hero.querySelector('.hero-atelier__products');
+        if (products) {
+          products.style.transform = `translate(${x}px, ${y}px)`;
         }
       },
       { passive: true }
     );
 
     hero.addEventListener('mouseleave', () => {
-      const wrap = hero.querySelector('.hero-kiln__product-wrap');
-      if (wrap) wrap.style.transform = '';
+      const products = hero.querySelector('.hero-atelier__products');
+      if (products) products.style.transform = '';
     });
   }
 
@@ -37,9 +37,7 @@ export function initMotion() {
 }
 
 function initScrollReveal() {
-  const targets = document.querySelectorAll(
-    '.hero-kiln__cell, .line-grid__item, .assertion__cell'
-  );
+  const targets = document.querySelectorAll('.line-grid__item, .assertion__cell');
   if (!targets.length) return;
 
   const observer = new IntersectionObserver(

@@ -17,69 +17,55 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Vollkorn:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=JetBrains+Mono:wght@400;500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="/images/products/cafe-verde.webp" fetchpriority="high">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="home">
+  <!-- THESIS: FILO как керамика в ателье · OWN-WORLD: paper/clay/celadon/oxblood · STORY: каталог→Telegram · FIRST VIEWPORT: FILO + полка · FORM: A editorial grid -->
   <a class="skip-link" href="#main">К содержимому</a>
   <header class="site-bar" id="siteBar"></header>
 
   <main id="main">
-    <section class="hero-kiln" id="heroKiln" aria-label="FILO Professional">
-      <div class="hero-kiln__main">
-        <div class="hero-kiln__copy">
-          <p class="hero-kiln__meta">Официальный дистрибьютор в России</p>
-          <p class="hero-kiln__brand" aria-hidden="true">FILO</p>
-          <h1 class="hero-kiln__title">Бразильская<br>профессиональная<br><em>химия для волос</em></h1>
-          <p class="hero-kiln__lead">
-            Отгрузка из Санкт-Петербурга по всей России для салонов и частных мастеров.
-          </p>
-          <div class="hero-kiln__cta-row">
-            <a href="/catalog.html" class="btn btn--oxide btn--hero">Открыть каталог</a>
-            <a href="#" data-telegram="price" class="hero-kiln__tg">Прайс в Telegram →</a>
-          </div>
-        </div>
-        <div class="hero-kiln__visual" id="heroVisual">
-          <div class="hero-kiln__cobalt" aria-hidden="true"></div>
-          <div class="hero-kiln__orb hero-kiln__orb--celadon" aria-hidden="true"></div>
-          <div class="hero-kiln__orb hero-kiln__orb--milky" aria-hidden="true"></div>
-          <div class="hero-kiln__glaze-sheen" aria-hidden="true"></div>
-          <div class="hero-kiln__stage">
-            <div class="hero-kiln__shelf-plane" aria-hidden="true"></div>
-            <div class="hero-kiln__product-wrap">
-              <img class="hero-kiln__product" src="/images/products/cafe-verde.webp" alt="Café Verde, редуктор объёма FILO Professional" width="640" height="640" fetchpriority="high" decoding="async">
-            </div>
-          </div>
-          <nav class="hero-kiln__lines" aria-label="Линейки">
-            <a href="/catalog.html?cat=volume" class="hero-kiln__line-link">Кератин</a>
-            <a href="/catalog.html?cat=treatment" class="hero-kiln__line-link">Ботокс</a>
-            <a href="/catalog.html?cat=volume" class="hero-kiln__line-link">Редуктор</a>
-            <a href="/catalog.html?cat=homecare" class="hero-kiln__line-link">Homecare</a>
-          </nav>
-        </div>
+    <section class="hero-atelier" id="heroAtelier" aria-label="FILO Professional">
+      <div class="hero-atelier__copy">
+        <h1 class="hero-atelier__title">
+          <span class="hero-atelier__filo">FILO</span>
+          <span class="hero-atelier__professional">Professional</span>
+        </h1>
+        <hr class="hero-atelier__rule" aria-hidden="true">
+        <p class="hero-atelier__tagline">для салонов и мастеров</p>
+        <a href="/catalog.html" class="btn btn--ghost btn--hero">Открыть каталог</a>
       </div>
-      <div class="hero-kiln__strip">
-        <div class="hero-kiln__cell hero-kiln__cell--cobalt">Оптовые цены</div>
-        <div class="hero-kiln__cell hero-kiln__cell--celadon">Отгрузка из СПб</div>
-        <div class="hero-kiln__cell">Доставка по России</div>
-        <div class="hero-kiln__cell hero-kiln__cell--oxide">Заказ в Telegram</div>
+      <div class="hero-atelier__visual" id="heroVisual">
+        <div class="hero-atelier__glaze hero-atelier__glaze--oxblood" aria-hidden="true"></div>
+        <div class="hero-atelier__glaze hero-atelier__glaze--celadon" aria-hidden="true"></div>
+        <div class="hero-atelier__stage">
+          <div class="hero-atelier__shelf" aria-hidden="true"></div>
+          <div class="hero-atelier__products">
+            <img class="hero-atelier__product hero-atelier__product--1" src="/images/products/cafe-verde.webp" alt="" width="280" height="420" fetchpriority="high" decoding="async">
+            <img class="hero-atelier__product hero-atelier__product--2" src="/images/products/ultra-fast.webp" alt="" width="260" height="400" loading="eager" decoding="async">
+            <img class="hero-atelier__product hero-atelier__product--3" src="/images/products/bamboo-therapy.webp" alt="" width="240" height="380" loading="eager" decoding="async">
+            <img class="hero-atelier__product hero-atelier__product--4" src="/images/products/splendor-oil.webp" alt="" width="220" height="360" loading="eager" decoding="async">
+          </div>
+        </div>
+        <p class="visually-hidden">Линейки FILO: кератин, ботокс, редуктор объёма, homecare</p>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="lines-title">
-      <div class="section__head container">
+    <section class="section section--lines" aria-labelledby="lines-title">
+      <div class="section__head">
         <h2 class="section__title" id="lines-title">Каталог по задачам</h2>
       </div>
       <div class="line-grid" id="lineGrid"></div>
     </section>
 
     <section class="assertion assertion--split" aria-labelledby="assertion-title">
-      <div class="assertion__cell assertion__cell--cobalt">
+      <div class="assertion__cell assertion__cell--celadon">
         <h2 class="assertion__title" id="assertion-title">Состав виден до отправки</h2>
         <p class="assertion__text">На странице заказа: превью текста для Telegram. Ничего не спишется без вашего подтверждения.</p>
       </div>
-      <div class="assertion__cell assertion__cell--celadon">
+      <div class="assertion__cell assertion__cell--clay">
         <h2 class="assertion__title">Минимум: один флакон</h2>
         <p class="assertion__text">Остатки и полный прайс для салонов уточняем в Telegram после заказа.</p>
       </div>
