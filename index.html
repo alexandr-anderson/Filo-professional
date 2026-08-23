@@ -15,194 +15,55 @@
   <meta property="og:description" content="Кератин, ботокс, редуктор объёма. Официальный дистрибьютор в России. Прайс в Telegram.">
   <meta property="og:image" content="https://filo-professional.ru/images/hero-brand.webp">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Piazzolla:ital,opsz,wght@0,8..30,400;0,8..30,500;0,8..30,600;1,8..30,400;1,8..30,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Vollkorn:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="/images/products/cafe-verde.webp" fetchpriority="high">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="home">
   <a class="skip-link" href="#main">К содержимому</a>
-  <div class="top-bar" id="topBar"></div>
-  <header class="header"></header>
+  <header class="site-bar" id="siteBar"></header>
 
   <main id="main">
-    <section class="hero" id="hero">
-      <div class="container hero__inner">
-        <div class="hero__content" data-hero-layer="copy">
-          <p class="hero__kicker">Официальный дистрибьютор · Россия</p>
-          <h1 class="hero__title">
-            <span class="hero__brand">FILO</span>
-            <em class="hero__tagline">для салонов и мастеров</em>
-          </h1>
-          <p class="hero__text">
-            Кератин, редуктор объёма и восстановление — бразильские линейки с поставкой из Санкт-Петербурга по всей России.
+    <section class="hero-kiln" id="heroKiln">
+      <div class="hero-kiln__main">
+        <div class="hero-kiln__copy">
+          <p class="hero-kiln__meta">Официальный дистрибьютор · Россия</p>
+          <h1 class="hero-kiln__title">Бразильская<br>профессиональная<br>химия для волос</h1>
+          <p class="hero-kiln__lead">
+            Официальный дистрибьютор FILO Professional в России. Отгрузка из Санкт-Петербурга по всей стране — для салонов и частных мастеров.
           </p>
-          <div class="hero__actions">
-            <a href="/catalog.html" class="btn btn--accent">Смотреть каталог</a>
-            <a href="#" data-telegram="price" class="btn btn--ghost-on-dark">Прайс в Telegram</a>
-          </div>
+          <a href="/catalog.html" class="btn btn--oxide">Открыть каталог</a>
+          <p class="hero-kiln__cta-note">Цены и остатки — в Telegram</p>
         </div>
-        <div class="hero__visual" data-hero-layer="visual">
-          <div class="hero__blush" data-hero-layer="blush" aria-hidden="true"></div>
-          <div class="hero-slider" id="heroSlider" aria-roledescription="carousel" aria-label="Линейки FILO">
-            <div class="hero-slider__track" id="heroSliderTrack"></div>
-            <p class="hero-slider__caption" id="heroSliderCaption" aria-live="polite"></p>
-            <div class="hero-slider__controls">
-              <button type="button" class="hero-slider__nav" id="heroSliderPrev" aria-label="Предыдущий слайд">←</button>
-              <div class="hero-slider__dots" id="heroSliderDots" role="tablist" aria-label="Слайды"></div>
-              <button type="button" class="hero-slider__nav" id="heroSliderNext" aria-label="Следующий слайд">→</button>
-            </div>
-            <div class="hero-slider__index" id="heroSliderIndex" aria-live="polite">
-              <span class="hero-slider__index-current" id="heroSliderCurrent">01</span>
-              <span class="hero-slider__index-sep" aria-hidden="true">—</span>
-              <span class="hero-slider__index-total" id="heroSliderTotal">04</span>
-            </div>
-          </div>
+        <div class="hero-kiln__visual" id="heroVisual">
+          <img src="/images/products/cafe-verde.webp" alt="Café Verde — редуктор объёма FILO Professional" width="800" height="800" fetchpriority="high" decoding="async">
+          <p class="hero-kiln__lines">Кератин · Ботокс · Редуктор объёма · Homecare</p>
         </div>
+      </div>
+      <div class="hero-kiln__strip">
+        <div class="hero-kiln__cell">Оптовые цены</div>
+        <div class="hero-kiln__cell hero-kiln__cell--celadon">Отгрузка из СПб</div>
+        <div class="hero-kiln__cell">Доставка по России</div>
+        <div class="hero-kiln__cell">Заказ в Telegram</div>
       </div>
     </section>
 
-    <section class="trust-bar" data-reveal>
-      <div class="container trust-bar__inner" id="trustBar"></div>
-    </section>
-
-    <section class="section section--b2b" data-reveal>
-      <div class="container">
-        <div class="section__header section__header--editorial">
-          <p class="section__label">Для профессионалов</p>
-          <h2 class="section__title">Салоны и <em>частные мастера</em></h2>
-          <p class="section__text">
-            Официальный дистрибьютор FILO в России. Напишите, чем работаете в кресле — подскажем набор и условия.
-          </p>
-        </div>
-        <div class="benefit-list" id="b2bBenefits"></div>
-        <div class="b2b-cta">
-          <a href="#" data-telegram="price" class="btn btn--primary">Уточнить условия в Telegram</a>
-        </div>
+    <section class="section" aria-labelledby="lines-title">
+      <div class="section__head container">
+        <p class="section__label">Линейки</p>
+        <h2 class="section__title" id="lines-title">Каталог по задачам</h2>
       </div>
+      <div class="line-grid" id="lineGrid"></div>
     </section>
 
-    <section class="section section--lines" data-reveal>
-      <div class="container">
-        <div class="section__header section__header--editorial section__header--split">
-          <div>
-            <p class="section__label">Линейки</p>
-            <h2 class="section__title">Каталог <em>по задачам</em></h2>
-          </div>
-          <a href="/catalog.html" class="section__aside-link">Весь каталог →</a>
-        </div>
-        <div class="category-grid" id="categoryGrid"></div>
-      </div>
-    </section>
-
-    <section class="section section--hits" data-reveal>
-      <div class="container">
-        <div class="section__header section__header--editorial section__header--row">
-          <div>
-            <p class="section__label">В работе</p>
-            <h2 class="section__title">Хиты <em>для кресла</em></h2>
-          </div>
-          <div class="carousel-nav">
-            <button class="carousel-nav__btn" id="carouselPrev" type="button" aria-label="Назад">←</button>
-            <button class="carousel-nav__btn" id="carouselNext" type="button" aria-label="Вперёд">→</button>
-          </div>
-        </div>
-        <div class="carousel" id="featuredCarousel">
-          <div class="carousel__track" id="featuredProducts"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="story" id="story" aria-label="История FILO">
-      <div class="story__track">
-        <div class="story__pin">
-          <div class="container story__inner">
-            <div class="story__copy">
-              <p class="section__label section__label--on-ink">История</p>
-              <div class="story__chapters" id="storyChapters">
-                <article class="story__chapter is-active" data-story-chapter="0">
-                  <span class="story__index">01</span>
-                  <h2 class="story__title">Бразилия <em>в формуле</em></h2>
-                  <p class="story__text">
-                    FILO родилась в 2018 году. Активы из Амазонии — в протоколах кератина,
-                    редуктора и восстановления, которые мастера берут в кресло.
-                  </p>
-                </article>
-                <article class="story__chapter" data-story-chapter="1">
-                  <span class="story__index">02</span>
-                  <h2 class="story__title">Лаборатория <em>и кресло</em></h2>
-                  <p class="story__text">
-                    Нанотехнологии рядом с органикой: стабильный результат на полотне,
-                    предсказуемый расход и понятная связка линеек под процедуру.
-                  </p>
-                </article>
-                <article class="story__chapter" data-story-chapter="2">
-                  <span class="story__index">03</span>
-                  <h2 class="story__title">Россия <em>из СПб</em></h2>
-                  <p class="story__text">
-                    Официальный дистрибьютор: консультация по набору, прайс в Telegram
-                    и поставки по всей стране — для салонов и частных мастеров.
-                  </p>
-                </article>
-              </div>
-              <div class="story__progress" aria-hidden="true">
-                <span class="story__progress-current" id="storyProgressCurrent">01</span>
-                <span class="story__progress-sep">—</span>
-                <span class="story__progress-total">03</span>
-              </div>
-            </div>
-            <div class="story__visual">
-              <div class="story__blush" aria-hidden="true"></div>
-              <div class="story__frames" id="storyFrames">
-                <figure class="story__frame is-active" data-story-frame="0">
-                  <img src="/images/categories/volume.webp" alt="Линейка редуктора FILO" loading="lazy" decoding="async">
-                </figure>
-                <figure class="story__frame" data-story-frame="1">
-                  <img src="/images/categories/treatment.webp" alt="Лечебные линейки FILO" loading="lazy" decoding="async">
-                </figure>
-                <figure class="story__frame" data-story-frame="2">
-                  <img src="/images/hero-brand.webp" alt="FILO Professional" loading="lazy" decoding="async">
-                </figure>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="about-split" data-reveal>
-      <div class="container about-split__inner">
-        <div class="about-split__content">
-          <p class="section__label section__label--on-ink">О бренде</p>
-          <h2 class="about-split__title">Из Бразилии — <em>для всего мира</em></h2>
-          <p class="about-split__text">
-            FILO Professional — с 2018 года, уже в более чем 10 странах.
-            Натуральные активы и нанотехнологии для протоколов в салоне.
-          </p>
-          <a href="/about.html" class="btn btn--ghost-on-dark">Узнать больше</a>
-        </div>
-        <div class="about-split__visual">
-          <div class="about-split__blush" aria-hidden="true"></div>
-          <div class="about-split__frame">
-            <img src="/images/hero-brand.webp" alt="FILO Professional" loading="lazy" decoding="async">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="cta-close" data-reveal>
-      <div class="container cta-close__inner">
-        <p class="section__label">Следующий шаг</p>
-        <h2 class="cta-close__title">Подберём линейку <em>под ваш салон</em></h2>
-        <p class="cta-close__text">
-          Расскажите о процедурах — состав заказа, поставка и прайс в Telegram.
+    <section class="assertion" aria-labelledby="assertion-title">
+      <div class="assertion__cell">
+        <h2 class="assertion__title" id="assertion-title">Остатки и цены — в Telegram</h2>
+        <p class="assertion__text">
+          Минимальный заказ — один флакон. Состав заказа виден до отправки: вы проверяете текст сообщения, затем подтверждаете в Telegram.
         </p>
-        <div class="cta-close__actions">
-          <a href="/catalog.html" class="btn btn--accent">Смотреть каталог</a>
-          <a href="#" data-telegram="price" class="btn btn--secondary">Написать в Telegram</a>
-        </div>
       </div>
     </section>
   </main>
