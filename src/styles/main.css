@@ -2714,7 +2714,7 @@ dialog > footer,
 
   .glass-pane--top-nav {
     order: -1;
-    padding-inline: 10px;
+    padding-inline: 8px;
     padding-block: 0;
     min-height: 48px;
     height: 48px;
@@ -2728,14 +2728,14 @@ dialog > footer,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
+    gap: 4px;
     padding-block: 0;
   }
 
   .glass-nav__link {
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    padding: 6px 3px;
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    padding: 6px 2px;
     white-space: nowrap;
     color: var(--charcoal-ink);
   }
@@ -2747,8 +2747,8 @@ dialog > footer,
   .glass-nav__cart {
     grid-column: auto;
     width: auto;
-    padding: 6px 10px;
-    font-size: 0.62rem;
+    padding: 5px 8px;
+    font-size: 0.58rem;
     font-weight: 600;
     flex-shrink: 0;
     border-radius: 0;
@@ -2882,14 +2882,6 @@ dialog > footer,
 }
 
 @media (max-width: 480px) {
-  .glass-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .glass-nav__lang {
-    display: none;
-  }
-
   .shelf-grid {
     grid-template-columns: minmax(0, 1fr);
   }
