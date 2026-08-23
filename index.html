@@ -13,66 +13,168 @@
   <meta property="og:url" content="https://filo-professional.ru/">
   <meta property="og:title" content="FILO Professional — для салонов и мастеров">
   <meta property="og:description" content="Кератин, ботокс, редуктор объёма. Официальный дистрибьютор в России. Прайс в Telegram.">
-  <meta property="og:image" content="https://filo-professional.ru/images/hero-brand.webp">
+  <meta property="og:image" content="https://filo-professional.ru/images/concept-b-bottle-glass.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=JetBrains+Mono:wght@400;500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="/images/products/cafe-verde.webp" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="/images/concept-b-glass-wall-bg.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/images/concept-b-bottle-glass.png" fetchpriority="high">
   <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body data-page="home">
-  <!-- THESIS: FILO как керамика в ателье · OWN-WORLD: paper/clay/celadon/oxblood · STORY: каталог→Telegram · FIRST VIEWPORT: FILO + полка · FORM: A editorial grid -->
+  <!-- THESIS: Сайт = стеклянная перегородка мастерской-лаборатории · OWN-WORLD: matte black #0E0E0E, seeded glass #F3F1EC, cobalt #1E3A8A · FORM: B Стекло и переплёт -->
   <a class="skip-link" href="#main">К содержимому</a>
-  <header class="site-bar" id="siteBar"></header>
 
   <main id="main">
-    <section class="hero-atelier" id="heroAtelier" aria-label="FILO Professional">
-      <div class="hero-atelier__copy">
-        <h1 class="hero-atelier__title">
-          <span class="hero-atelier__filo">FILO</span>
-          <span class="hero-atelier__professional">Professional</span>
-        </h1>
-        <hr class="hero-atelier__rule" aria-hidden="true">
-        <p class="hero-atelier__tagline">для салонов и мастеров</p>
-        <a href="/catalog.html" class="btn btn--ghost btn--hero">Открыть каталог</a>
+    <!-- Стеклянная фасадная стена (HERO WALL) -->
+    <section class="glass-wall" id="heroWall" aria-label="FILO Professional — фасад мастерской">
+      <div class="glass-wall__bg" aria-hidden="true"></div>
+
+      <!-- ВЕРХНИЙ РЯД СТЕКОЛ / ТРАНЦЫ (НАВИГАЦИЯ В СТЕКЛЕ) -->
+      <div class="glass-pane glass-pane--top-left">
+        <p class="glass-meta">
+          ПРОФЕССИОНАЛЬНЫЙ<br>
+          УХОД ЗА ВОЛОСАМИ<br>
+          ДЛЯ БИЗНЕСА
+        </p>
       </div>
-      <div class="hero-atelier__visual" id="heroVisual">
-        <div class="hero-atelier__glaze hero-atelier__glaze--oxblood" aria-hidden="true"></div>
-        <div class="hero-atelier__glaze hero-atelier__glaze--celadon" aria-hidden="true"></div>
-        <div class="hero-atelier__stage">
-          <div class="hero-atelier__shelf" aria-hidden="true"></div>
-          <div class="hero-atelier__products">
-            <img class="hero-atelier__product hero-atelier__product--1" src="/images/products/cafe-verde.webp" alt="" width="280" height="420" fetchpriority="high" decoding="async">
-            <img class="hero-atelier__product hero-atelier__product--2" src="/images/products/ultra-fast.webp" alt="" width="260" height="400" loading="eager" decoding="async">
-            <img class="hero-atelier__product hero-atelier__product--3" src="/images/products/bamboo-therapy.webp" alt="" width="240" height="380" loading="eager" decoding="async">
-            <img class="hero-atelier__product hero-atelier__product--4" src="/images/products/splendor-oil.webp" alt="" width="220" height="360" loading="eager" decoding="async">
+
+      <div class="glass-pane glass-pane--top-center" aria-hidden="true"></div>
+
+      <div class="glass-pane glass-pane--top-nav">
+        <nav class="glass-nav" aria-label="Основная навигация">
+          <a href="/about.html" class="glass-nav__link">О БРЕНДЕ</a>
+          <a href="/catalog.html" class="glass-nav__link">ПРОДУКТЫ</a>
+          <a href="/delivery.html" class="glass-nav__link">ПОДДЕРЖКА</a>
+          <a href="#" data-telegram="price" class="glass-nav__link">КОНТАКТЫ</a>
+          <div class="glass-nav__lang" aria-label="Выбор языка">
+            <span>RU</span>
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
           </div>
+          <a href="/order.html" class="glass-nav__cart" id="topCartLink">ЗАКАЗ (<span id="cartCountBadge">0</span>)</a>
+        </nav>
+      </div>
+
+      <!-- СРЕДНИЙ ГЛАВНЫЙ РЯД ПАНЕЛЕЙ -->
+      <!-- Левая панель: Крупный манифест бренда -->
+      <div class="glass-pane glass-pane--main-statement">
+        <div class="pane-content">
+          <h1 class="glass-title">
+            FILO<br>
+            PROFESSIONAL —<br>
+            РЕШЕНИЯ,<br>
+            КОТОРЫЕ РАБОТАЮТ<br>
+            НА ВАШ БИЗНЕС
+          </h1>
+          <p class="glass-subtitle">
+            Профессиональный уход за волосами<br>
+            для салонов красоты и ритейла
+          </p>
         </div>
-        <p class="visually-hidden">Линейки FILO: кератин, ботокс, редуктор объёма, homecare</p>
+      </div>
+
+      <!-- Центральная акцентная панель: СИНИЙ КОБАЛЬТ «ЗАЖЖЕННОЕ СТЕКЛО» -->
+      <div class="glass-pane glass-pane--cobalt-highlight" id="cobaltPane">
+        <div class="cobalt-shimmer" aria-hidden="true"></div>
+        <div class="cobalt-content">
+          <div class="cobalt-brand">
+            <span class="cobalt-brand__name">FILO</span>
+            <span class="cobalt-brand__tag">PROFESSIONAL</span>
+          </div>
+          <a href="/catalog.html" class="btn-cobalt-cta">
+            <span>ОТКРЫТЬ КАТАЛОГ</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Правая панель: Силуэт флакона за матовым рифленым стеклом -->
+      <div class="glass-pane glass-pane--product-silhouette">
+        <div class="glass-silhouetted-bottle">
+          <img src="/images/concept-b-bottle-glass.png" alt="Флакон FILO Professional за матовым стеклом" width="600" height="800" fetchpriority="high" decoding="async">
+        </div>
+      </div>
+
+      <!-- НИЖНИЙ РЯД СТЕКОЛ (ФУТЕР ФАСАДА) -->
+      <div class="glass-pane glass-pane--bottom-left">
+        <p class="glass-footnote">
+          СДЕЛАНО В БРАЗИЛИИ<br>
+          ДЛЯ ПРОФЕССИОНАЛОВ
+        </p>
+      </div>
+
+      <div class="glass-pane glass-pane--bottom-center" aria-hidden="true">
+        <span class="glass-indicator"></span>
+      </div>
+
+      <div class="glass-pane glass-pane--bottom-right">
+        <p class="glass-footnote glass-footnote--right">
+          ОПТОВЫЕ ПОСТАВКИ<br>
+          ПО ВСЕЙ РОССИИ
+        </p>
       </div>
     </section>
 
-    <section class="section section--lines" aria-labelledby="lines-title">
-      <div class="section__head">
-        <h2 class="section__title" id="lines-title">Каталог по задачам</h2>
+    <!-- СЕКЦИЯ ЛИНЕЕК / КАТАЛОГ-СТЕНА ПАНЕЛЕЙ -->
+    <section class="section-mullions" id="categoriesSection" aria-labelledby="lines-heading">
+      <div class="section-mullions__header">
+        <span class="mullion-tag">01 / КАТАЛОГ ЛАБОРАТОРИИ</span>
+        <h2 class="mullion-heading" id="lines-heading">Профессиональные линейки FILO</h2>
       </div>
-      <div class="line-grid" id="lineGrid"></div>
+
+      <div class="mullion-grid" id="lineGrid">
+        <!-- Генерируется из app.js: 4 панели с эффектом подсветки при наведении -->
+      </div>
     </section>
 
-    <section class="assertion assertion--split" aria-labelledby="assertion-title">
-      <div class="assertion__cell assertion__cell--celadon">
-        <h2 class="assertion__title" id="assertion-title">Состав виден до отправки</h2>
-        <p class="assertion__text">На странице заказа: превью текста для Telegram. Ничего не спишется без вашего подтверждения.</p>
+    <!-- СЕКЦИЯ ПРЕИМУЩЕСТВ И ОПЕРАЦИОННОЙ НАДЕЖНОСТИ (СТЕКЛЯННЫЙ БЛОК) -->
+    <section class="section-assertion-wall" aria-labelledby="assertion-heading">
+      <div class="assertion-pane assertion-pane--cobalt">
+        <span class="pane-step">02 · БЕЗОПАСНОСТЬ</span>
+        <h3 class="pane-title" id="assertion-heading">Состав и цены прозрачны до отправки</h3>
+        <p class="pane-desc">Вся спецификация формируется на сайте. Никаких скрытых условий: финальное подтверждение происходит напрямую с дистрибьютором в Telegram.</p>
       </div>
-      <div class="assertion__cell assertion__cell--clay">
-        <h2 class="assertion__title">Минимум: один флакон</h2>
-        <p class="assertion__text">Остатки и полный прайс для салонов уточняем в Telegram после заказа.</p>
+      <div class="assertion-pane assertion-pane--glass">
+        <span class="pane-step">03 · ГИБКОСТЬ</span>
+        <h3 class="pane-title">Тестовые и оптовые партии от 1 флакона</h3>
+        <p class="pane-desc">Отгрузка из Санкт-Петербурга курьерскими службами СДЭК, Boxberry и Деловые Линии по всей территории РФ.</p>
       </div>
     </section>
   </main>
 
-  <footer class="footer"></footer>
+  <footer class="glass-footer">
+    <div class="glass-footer__inner">
+      <div class="glass-footer__col">
+        <span class="glass-footer__brand">FILO PROFESSIONAL</span>
+        <p class="glass-footer__text">Официальный дистрибьютор в России. Профессиональная косметика для салонов красоты и сертифицированных мастеров.</p>
+      </div>
+      <div class="glass-footer__col">
+        <span class="glass-footer__label">НАВИГАЦИЯ</span>
+        <ul class="glass-footer__links">
+          <li><a href="/">Главная</a></li>
+          <li><a href="/catalog.html">Каталог</a></li>
+          <li><a href="/order.html">Оформить заказ</a></li>
+          <li><a href="/delivery.html">Доставка и оплата</a></li>
+          <li><a href="/about.html">О дистрибьюторе</a></li>
+        </ul>
+      </div>
+      <div class="glass-footer__col">
+        <span class="glass-footer__label">СВЯЗЬ И ОПЕРАТОР</span>
+        <ul class="glass-footer__links">
+          <li><a href="#" data-telegram="price">Telegram: @filo_russia</a></li>
+          <li><a href="mailto:info@filo-professional.ru">info@filo-professional.ru</a></li>
+          <li><span>Пн–Пт: 10:00 — 19:00 (МСК)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="glass-footer__bottom">
+      <span>© 2026 FILO Professional Russia · Все права защищены</span>
+      <a href="/privacy.html">Политика конфиденциальности</a>
+    </div>
+  </footer>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
