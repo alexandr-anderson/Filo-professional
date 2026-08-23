@@ -636,7 +636,6 @@ async function handleOrderSubmit(e) {
   const errors = [];
   if (!formData.name) errors.push('name');
   if (!formData.phone) errors.push('phone');
-  if (formData.needsDelivery && !formData.delivery) errors.push('delivery');
 
   if (errors.length) {
     messageEl.className = 'form-message';
