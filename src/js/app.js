@@ -432,8 +432,6 @@ function buildOrderMessage(formData) {
     'Клиент:',
     `Имя: ${formData.name}`,
     `Телефон: ${formData.phone}`,
-    `Город: ${formData.city}`,
-    `Тип: ${formData.clientType}`,
     '',
     'Доставка:',
     formData.needsDelivery
@@ -548,23 +546,11 @@ function renderOrderForm() {
         <input type="tel" id="customerPhone" name="phone" required autocomplete="tel">
       </div>
       <div class="form-group">
-        <label for="customerCity">Город</label>
-        <input type="text" id="customerCity" name="city" required autocomplete="address-level2">
-      </div>
-      <div class="form-group">
-        <label for="customerType">Вы</label>
-        <select id="customerType" name="clientType" required>
-          <option value="">Салон или мастер</option>
-          <option value="Салон">Салон</option>
-          <option value="Частный мастер">Частный мастер</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label class="form-checkbox">
           <input type="checkbox" id="needsDelivery" name="needsDelivery">
           <span>Нужна доставка</span>
         </label>
-        <p class="form-hint">Без отметки — самовывоз в Санкт-Петербурге</p>
+        <p class="form-hint">Вы можете указать адрес доставки сразу или после беседы с менеджером</p>
       </div>
       <div id="deliveryFields" hidden>
         <div class="form-group">
@@ -592,7 +578,7 @@ function renderOrderForm() {
     updateOrderPreview();
   });
 
-  ['customerName', 'customerPhone', 'customerCity', 'customerType', 'deliveryMethod', 'customerAddress'].forEach(
+  ['customerName', 'customerPhone', 'deliveryMethod', 'customerAddress'].forEach(
     (id) => {
       document.getElementById(id)?.addEventListener('input', updateOrderPreview);
       document.getElementById(id)?.addEventListener('change', updateOrderPreview);
@@ -609,8 +595,6 @@ function getFormData() {
   return {
     name: form.name.value.trim(),
     phone: form.phone.value.trim(),
-    city: form.city.value.trim(),
-    clientType: form.clientType.value,
     needsDelivery: form.needsDelivery.checked,
     delivery: form.delivery.value,
     address: form.address.value.trim(),
@@ -627,8 +611,6 @@ function updateOrderPreview() {
     preview.textContent = buildOrderMessage({
       name: '…',
       phone: '…',
-      city: '…',
-      clientType: '…',
       needsDelivery: fd?.needsDelivery || false,
       delivery: fd?.delivery || '',
       address: fd?.address || '',
@@ -654,8 +636,6 @@ async function handleOrderSubmit(e) {
   const errors = [];
   if (!formData.name) errors.push('name');
   if (!formData.phone) errors.push('phone');
-  if (!formData.city) errors.push('city');
-  if (!formData.clientType) errors.push('clientType');
   if (formData.needsDelivery && !formData.delivery) errors.push('delivery');
 
   if (errors.length) {
