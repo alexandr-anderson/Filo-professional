@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Наряд-заказ — FILO Professional</title>
+  <meta name="description" content="Оформление заказа FILO Professional для салонов и мастеров. Отправка состава в Telegram.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://filo-professional.ru/order.html">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Vollkorn:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body data-page="order">
+  <a class="skip-link" href="#main">К содержимому</a>
+  <header class="site-bar" id="siteBar"></header>
+
+  <main id="main">
+    <div class="order-layout" id="orderLayout">
+      <div class="order-main">
+        <div class="order-header" id="orderHeader">FILO Professional · наряд-заказ</div>
+        <div id="orderBody"></div>
+      </div>
+      <aside class="order-aside" id="orderAside" aria-labelledby="orderAsideTitle">
+        <h2 class="order-aside__title" id="orderAsideTitle">Что дальше</h2>
+        <ol class="order-aside__steps">
+          <li>Вы отправляете заказ</li>
+          <li>Состав подставится в сообщение</li>
+          <li>Оператор пришлёт цены и срок</li>
+        </ol>
+        <div id="orderFormWrap"></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer"></footer>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

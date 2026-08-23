@@ -1,14 +1,11 @@
 import {
   products,
   productLines,
-  trustItems,
-  b2bBenefits,
   categories,
   formatPrice,
   formatRubles,
   formatCartTotal,
   getCartPricing,
-  PRICE_LABEL,
   PRICE_HINT,
 } from '../data/products.js';
 import {
@@ -36,73 +33,140 @@ import {
 const currentPage = document.body.dataset.page || 'home';
 const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
 
+const STATEMENTS = [
+  {
+    title: 'Остатки и цены',
+    text: 'Актуальный прайс для салонов и мастеров — в Telegram после заказа.',
+    tone: 'celadon',
+  },
+  {
+    title: 'Минимальный заказ',
+    text: 'Один флакон — достаточно для первой поставки и теста линейки.',
+    tone: 'cobalt',
+  },
+  {
+    title: 'Отгрузка из СПб',
+    text: 'СДЭК, Почта России, Boxberry — по всей России.',
+    tone: 'celadon',
+  },
+];
+
 export function initApp() {
-  renderTopBar();
-  renderHeader();
-  wrapSiteHeader();
+  renderSiteBar();
   renderFooter();
   wireTelegramLinks();
-  initHeaderScroll();
-  initCart();
+  initSiteBarScroll();
   initMobileMenu();
   initCookieConsent();
+  injectToast();
 
   if (currentPage === 'home') initHome();
   if (currentPage === 'catalog') initCatalog();
+  if (currentPage === 'order') initOrder();
 }
 
-function wrapSiteHeader() {
-  const topBar = document.getElementById('topBar');
-  const header = document.querySelector('.header');
-  if (!topBar || !header || document.getElementById('siteHeader')) return;
+function renderSiteBar() {
+  const bar = document.getElementById('siteBar');
+  if (!bar) return;
 
-  const shell = document.createElement('div');
-  shell.className = 'site-header';
-  shell.id = 'siteHeader';
+  const count = getCartCount();
+  const links = [
+    { href: '/catalog.html', label: 'Каталог', page: 'catalog' },
+    { href: '/order.html', label: `Заказ (${count})`, page: 'order' },
+  ];
 
-  const parent = topBar.parentNode;
-  parent.insertBefore(shell, topBar);
-  shell.append(topBar, header);
+  bar.innerHTML = `
+    <div class="container site-bar__inner">
+      <a href="/" class="site-bar__brand">FILO Professional</a>
+      <span class="site-bar__meta">СПб · <a href="${getTelegramUrl()}" target="_blank" rel="noopener">@${TELEGRAM_USERNAME}</a></span>
+      <nav class="site-bar__nav" id="siteNav" aria-label="Основная навигация">
+        ${links
+          .map(
+            (l) =>
+              `<a href="${l.href}" class="site-bar__link ${currentPage === l.page ? 'site-bar__link--active' : ''}">${l.label}</a>`
+          )
+          .join('')}
+      </nav>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Меню" aria-expanded="false" aria-controls="siteNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  `;
 }
 
-function initHeaderScroll() {
-  const shell = document.getElementById('siteHeader');
-  if (!shell) return;
+function updateOrderLink() {
+  const count = getCartCount();
+  const link = document.querySelector('.site-bar__link[href="/order.html"]');
+  if (link) link.textContent = `Заказ (${count})`;
+}
 
-  let lastY = window.scrollY;
-  let ticking = false;
+function initSiteBarScroll() {
+  const bar = document.getElementById('siteBar');
+  if (!bar) return;
 
-  const update = () => {
-    const y = window.scrollY;
-    const delta = y - lastY;
-
-    shell.classList.toggle('site-header--scrolled', y > 24);
-    shell.classList.toggle('site-header--compact', y > 80);
-
-    if (y < 48 || document.body.classList.contains('nav-open')) {
-      shell.classList.remove('site-header--hidden');
-    } else if (delta > 8) {
-      shell.classList.add('site-header--hidden');
-    } else if (delta < -8) {
-      shell.classList.remove('site-header--hidden');
-    }
-
-    lastY = y;
-    ticking = false;
+  const onScroll = () => {
+    bar.classList.toggle('site-bar--oxide', window.scrollY > 48);
   };
 
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!ticking) {
-        requestAnimationFrame(update);
-        ticking = true;
-      }
-    },
-    { passive: true }
-  );
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
 
-  update();
+function initMobileMenu() {
+  const toggle = document.getElementById('menuToggle');
+  const nav = document.getElementById('siteNav');
+  if (!toggle || !nav) return;
+
+  const setOpen = (open) => {
+    nav.classList.toggle('site-bar__nav--open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.classList.toggle('nav-open', open);
+  };
+
+  toggle.addEventListener('click', () => setOpen(!nav.classList.contains('site-bar__nav--open')));
+  nav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+}
+
+function renderFooter() {
+  const footer = document.querySelector('.footer');
+  if (!footer) return;
+
+  footer.innerHTML = `
+    <div class="footer__grid">
+      <div class="footer__cell">
+        <a href="/" class="footer__brand">FILO Professional</a>
+        <p class="footer__desc">Официальный дистрибьютор ${BRAND_NAME} в России. Санкт-Петербург · поставки по всей стране.</p>
+        <a href="#" data-telegram="price" class="btn btn--on-dark btn--sm">Прайс в Telegram</a>
+      </div>
+      <div class="footer__cell">
+        <p class="footer__title">Навигация</p>
+        <ul class="footer__links">
+          <li><a href="/">Главная</a></li>
+          <li><a href="/catalog.html">Каталог</a></li>
+          <li><a href="/order.html">Заказ</a></li>
+          <li><a href="/delivery.html">Доставка</a></li>
+          <li><a href="/about.html">О нас</a></li>
+        </ul>
+      </div>
+      <div class="footer__cell">
+        <p class="footer__title">Контакты</p>
+        <ul class="footer__links">
+          <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
+          <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
+          <li><a href="tel:${CONTACT_PHONE}">${CONTACT_PHONE_DISPLAY}</a></li>
+          <li>Пн–Пт 10:00–19:00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom container">
+      <span>© ${new Date().getFullYear()} ${BRAND_NAME} · ${OPERATOR_NAME} · ИНН ${OPERATOR_INN} · ОГРНИП ${OPERATOR_OGRNIP}</span>
+      <a href="/privacy.html">Политика конфиденциальности</a>
+    </div>
+  `;
 }
 
 function wireTelegramLinks() {
@@ -113,501 +177,238 @@ function wireTelegramLinks() {
   });
 }
 
-function renderTopBar() {
-  const topBar = document.getElementById('topBar');
-  if (!topBar) return;
-
-  topBar.innerHTML = `
-    <div class="container top-bar__inner top-bar__inner--contact">
-      <span class="top-bar__contact">Санкт-Петербург · Пн–Пт 10:00–19:00</span>
-      <a class="top-bar__contact" href="${getTelegramUrl()}" target="_blank" rel="noopener">@${TELEGRAM_USERNAME}</a>
-      <a class="top-bar__contact" href="tel:${CONTACT_PHONE}">${CONTACT_PHONE_DISPLAY}</a>
-    </div>
-  `;
+function injectToast() {
+  if (document.getElementById('toast')) return;
+  document.body.insertAdjacentHTML('beforeend', '<div class="toast" id="toast" role="status" aria-live="polite"></div>');
 }
 
-function renderHeader() {
-  const header = document.querySelector('.header');
-  if (!header) return;
-
-  const count = getCartCount();
-  const navLinks = [
-    { href: '/', label: 'Главная', page: 'home' },
-    { href: '/catalog.html', label: 'Каталог', page: 'catalog' },
-    { href: '/delivery.html', label: 'Доставка', page: 'delivery' },
-    { href: '/about.html', label: 'О нас', page: 'about' },
-  ];
-
-  header.innerHTML = `
-    <div class="container header__inner">
-      <a href="/" class="logo">FILO <span>Professional</span></a>
-      <nav class="nav" id="nav">
-        ${navLinks
-          .map(
-            (l) =>
-              `<a href="${l.href}" class="nav__link ${currentPage === l.page ? 'nav__link--active' : ''}">${l.label}</a>`
-          )
-          .join('')}
-      </nav>
-      <div class="header__actions">
-        <a href="#" data-telegram="price" class="btn btn--sm btn--secondary header__telegram">Telegram</a>
-        <button class="cart-btn" id="cartBtn" type="button" aria-label="Корзина, товаров: ${count}">
-          <span class="cart-btn__label">Корзина</span>
-          <span class="cart-btn__count" data-count="${count}">(${count})</span>
-        </button>
-        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Меню" aria-expanded="false" aria-controls="nav">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-function renderFooter() {
-  const footer = document.querySelector('.footer');
-  if (!footer) return;
-
-  footer.innerHTML = `
-    <div class="container">
-      <div class="footer__top">
-        <div class="footer__brand-block">
-          <a href="/" class="footer__brand">FILO <span>Professional</span></a>
-          <p class="footer__desc">
-            Официальный дистрибьютор ${BRAND_NAME} в России.
-            Санкт-Петербург · поставки по всей стране.
-          </p>
-          <a href="#" data-telegram="price" class="btn btn--ghost-on-dark btn--sm footer__cta">Прайс в Telegram</a>
-        </div>
-        <div class="footer__cols">
-          <div class="footer__col">
-            <div class="footer__title">Навигация</div>
-            <ul class="footer__links">
-              <li><a href="/">Главная</a></li>
-              <li><a href="/catalog.html">Каталог</a></li>
-              <li><a href="/delivery.html">Доставка</a></li>
-              <li><a href="/about.html">О нас</a></li>
-            </ul>
-          </div>
-          <div class="footer__col">
-            <div class="footer__title">Контакты</div>
-            <ul class="footer__links">
-              <li><a href="${getTelegramUrl()}" target="_blank" rel="noopener">Telegram</a></li>
-              <li><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></li>
-              <li><a href="tel:${CONTACT_PHONE}">${CONTACT_PHONE_DISPLAY}</a></li>
-              <li>Пн–Пт, 10:00–19:00 (МСК)</li>
-              <li>Санкт-Петербург</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="footer__bottom">
-        <span>© ${new Date().getFullYear()} ${BRAND_NAME} Russia · ${OPERATOR_NAME} · ИНН ${OPERATOR_INN} · ОГРНИП ${OPERATOR_OGRNIP}</span>
-        <a href="/privacy.html" class="footer__legal">Политика конфиденциальности</a>
-        <a href="https://filoprofessional.com.br" class="footer__legal" target="_blank" rel="noopener">filoprofessional.com.br</a>
-      </div>
-    </div>
-  `;
-}
-
-function initMobileMenu() {
-  const toggle = document.getElementById('menuToggle');
-  const nav = document.getElementById('nav');
-  const shell = document.getElementById('siteHeader');
-  if (!toggle || !nav) return;
-
-  const focusableSelector =
-    'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-  const isMobileNav = () => window.matchMedia('(max-width: 768px)').matches;
-
-  const syncNavAria = (open = nav.classList.contains('nav--open')) => {
-    if (!isMobileNav()) {
-      nav.setAttribute('aria-hidden', 'false');
-      return;
-    }
-    nav.setAttribute('aria-hidden', open ? 'false' : 'true');
-  };
-
-  syncNavAria(false);
-
-  const setOpen = (open) => {
-    nav.classList.toggle('nav--open', open);
-    toggle.classList.toggle('menu-toggle--active', open);
-    document.body.classList.toggle('nav-open', open);
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    shell?.classList.toggle('site-header--nav-open', open);
-    syncNavAria(open);
-
-    if (open) {
-      shell?.classList.remove('site-header--hidden');
-      const first = nav.querySelector(focusableSelector);
-      if (first) first.focus();
-    } else if (isMobileNav()) {
-      toggle.focus();
-    }
-  };
-
-  toggle.addEventListener('click', () => {
-    setOpen(!nav.classList.contains('nav--open'));
-  });
-
-  nav.querySelectorAll('.nav__link').forEach((link) => {
-    link.addEventListener('click', () => setOpen(false));
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.matchMedia('(min-width: 769px)').matches) {
-      setOpen(false);
-      syncNavAria(false);
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && nav.classList.contains('nav--open')) {
-      setOpen(false);
-      return;
-    }
-
-    if (e.key !== 'Tab' || !nav.classList.contains('nav--open')) return;
-
-    const focusable = [toggle, ...nav.querySelectorAll(focusableSelector)].filter(
-      (el, i, arr) => arr.indexOf(el) === i
-    );
-    if (!focusable.length) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  });
+export function showToast(text) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = text;
+  toast.classList.add('toast--show');
+  window.setTimeout(() => toast.classList.remove('toast--show'), 2800);
 }
 
 function initCookieConsent() {
   if (localStorage.getItem(COOKIE_CONSENT_KEY) || document.getElementById('cookieConsent')) return;
 
   const show = () => {
-    if (document.getElementById('cookieConsent') || localStorage.getItem(COOKIE_CONSENT_KEY)) return;
-
+    if (document.getElementById('cookieConsent')) return;
     document.body.insertAdjacentHTML(
       'beforeend',
-      `
-    <div class="cookie-consent" id="cookieConsent" role="dialog" aria-live="polite" aria-label="Согласие на использование cookie">
-      <div class="container cookie-consent__inner">
-        <p class="cookie-consent__text">
-          Cookie для работы сайта и корзины.
-          <a href="/privacy.html">Политика</a>
-        </p>
-        <button type="button" class="btn btn--primary btn--sm cookie-consent__btn" id="cookieConsentAccept">
-          Принять
-        </button>
-      </div>
-    </div>`
+      `<div class="cookie-consent" id="cookieConsent" role="dialog" aria-label="Cookie">
+        <div class="container cookie-consent__inner">
+          <p class="cookie-consent__text">Cookie для корзины и работы сайта. <a href="/privacy.html">Политика</a></p>
+          <button type="button" class="btn btn--oxide btn--sm" id="cookieAccept">Принять</button>
+        </div>
+      </div>`
     );
-
     document.body.classList.add('cookie-visible');
-    const accept = document.getElementById('cookieConsentAccept');
-    accept?.addEventListener('click', () => {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    document.getElementById('cookieAccept')?.addEventListener('click', () => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, '1');
       document.getElementById('cookieConsent')?.remove();
       document.body.classList.remove('cookie-visible');
     });
-    window.requestAnimationFrame(() => accept?.focus());
   };
 
-  // Не перекрывать первый экран сразу — после скролла или короткой паузы
-  let shown = false;
-  const once = () => {
-    if (shown) return;
-    shown = true;
-    window.removeEventListener('scroll', once);
-    show();
-  };
-  window.addEventListener('scroll', once, { passive: true });
-  window.setTimeout(once, 2800);
+  window.setTimeout(show, 2400);
 }
 
-function initCart() {
-  injectCartUI();
+function initHome() {
+  const grid = document.getElementById('lineGrid');
+  if (grid) {
+    grid.innerHTML = productLines
+      .map(
+        (line) => `
+      <a href="${line.href}" class="line-grid__item">
+        <div class="line-grid__media">
+          <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
+        </div>
+        <div class="line-grid__body">
+          <h3 class="line-grid__title">${line.title}</h3>
+          <p class="line-grid__sub">${line.subtitle}</p>
+          <span class="line-grid__go">Смотреть →</span>
+        </div>
+      </a>`
+      )
+      .join('');
+  }
 
-  document.getElementById('cartBtn')?.addEventListener('click', openCart);
-  document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
-  document.getElementById('cartClose')?.addEventListener('click', closeCart);
-  document.getElementById('checkoutBtn')?.addEventListener('click', showCheckout);
-  document.getElementById('backToCart')?.addEventListener('click', hideCheckout);
-  document.getElementById('checkoutForm')?.addEventListener('submit', handleOrderSubmit);
-  document.getElementById('needsDelivery')?.addEventListener('change', toggleDeliveryFields);
-  toggleDeliveryFields();
-  updateCartUI();
+  const heroVisual = document.getElementById('heroVisual');
+  if (heroVisual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const key = 'filo_kiln_revealed';
+    if (sessionStorage.getItem(key)) {
+      heroVisual.classList.add('is-revealed');
+    } else {
+      heroVisual.querySelector('img')?.addEventListener(
+        'animationend',
+        () => {
+          heroVisual.classList.add('is-revealed');
+          sessionStorage.setItem(key, '1');
+        },
+        { once: true }
+      );
+    }
+  } else {
+    heroVisual?.classList.add('is-revealed');
+  }
+}
 
-  document.addEventListener('keydown', (event) => {
-    const sidebar = document.getElementById('cartSidebar');
-    if (!sidebar?.classList.contains('cart-sidebar--open')) return;
+function renderShelfCell(product) {
+  const qty = getItemQty(product.id);
+  const inCart = qty > 0;
+  const actions = inCart
+    ? `<div class="shelf-qty" data-id="${product.id}">
+        <button type="button" class="shelf-qty__btn" data-action="decrease" aria-label="Меньше">−</button>
+        <span class="shelf-qty__val">${qty}</span>
+        <button type="button" class="shelf-qty__btn" data-action="increase" aria-label="Больше">+</button>
+      </div>`
+    : `<button type="button" class="shelf-add add-to-cart" data-id="${product.id}">В заказ</button>`;
 
-    if (event.key === 'Escape') {
-      closeCart();
+  return `
+    <article class="shelf-cell ${inCart ? 'shelf-cell--in-cart' : ''}" data-category="${product.category}" data-id="${product.id}" data-name="${product.name.toLowerCase()}">
+      <span class="shelf-cell__cat">${product.categoryLabel}</span>
+      <div class="shelf-cell__media">
+        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
+      </div>
+      <div class="shelf-cell__foot">
+        <h3 class="shelf-cell__name">${product.name}</h3>
+        <p class="shelf-cell__meta">${product.volume} · ${product.line}</p>
+        <p class="shelf-cell__price">${formatPrice(product)}</p>
+        <div class="shelf-cell__actions">${actions}</div>
+      </div>
+    </article>`;
+}
+
+function renderStatementCell(statement) {
+  const cls = statement.tone === 'cobalt' ? ' shelf-cell--statement-cobalt' : '';
+  return `
+    <div class="shelf-cell shelf-cell--statement${cls}" aria-hidden="false">
+      <h3 class="shelf-cell__statement-title">${statement.title}</h3>
+      <p class="shelf-cell__statement-text">${statement.text}</p>
+    </div>`;
+}
+
+function bindShelfCart(container) {
+  if (container.dataset.bound) return;
+  container.dataset.bound = '1';
+
+  container.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('.add-to-cart');
+    if (addBtn) {
+      addToCart(addBtn.dataset.id);
+      refreshShelfCells(container);
+      updateOrderLink();
       return;
     }
 
-    if (event.key !== 'Tab') return;
-    const focusable = getCartFocusable();
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
+    const step = e.target.closest('[data-action]');
+    if (!step) return;
+    const wrap = step.closest('.shelf-qty');
+    if (!wrap) return;
+    const id = wrap.dataset.id;
+    const qty = getItemQty(id);
+    if (step.dataset.action === 'increase') updateQty(id, qty + 1);
+    if (step.dataset.action === 'decrease') updateQty(id, qty - 1);
+    refreshShelfCells(container);
+    updateOrderLink();
+  });
+}
+
+function refreshShelfCells(container) {
+  container.querySelectorAll('.shelf-cell[data-id]').forEach((cell) => {
+    const id = cell.dataset.id;
+    const product = products.find((p) => p.id === id);
+    if (!product) return;
+    const next = document.createElement('div');
+    next.innerHTML = renderShelfCell(product);
+    cell.replaceWith(next.firstElementChild);
+  });
+}
+
+function buildCatalogGrid(activeCat, searchQuery = '') {
+  const q = searchQuery.trim().toLowerCase();
+  let filtered = products.filter((p) => {
+    const catOk = activeCat === 'all' || p.category === activeCat;
+    const searchOk =
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.categoryLabel.toLowerCase().includes(q) ||
+      (p.tagline && p.tagline.toLowerCase().includes(q)) ||
+      (p.line && p.line.toLowerCase().includes(q));
+    return catOk && searchOk;
+  });
+
+  const parts = [];
+  let stmtIndex = 0;
+  filtered.forEach((p, i) => {
+    if (i > 0 && i % 6 === 0) {
+      parts.push(renderStatementCell(STATEMENTS[stmtIndex % STATEMENTS.length]));
+      stmtIndex += 1;
     }
+    parts.push(renderShelfCell(p));
   });
+
+  return { html: parts.join(''), count: filtered.length };
 }
 
-function toggleDeliveryFields() {
-  const needsDelivery = document.getElementById('needsDelivery');
-  const deliveryFields = document.getElementById('deliveryFields');
-  if (!needsDelivery || !deliveryFields) return;
-  deliveryFields.hidden = !needsDelivery.checked;
-}
+function initCatalog() {
+  const grid = document.getElementById('shelfGrid');
+  const registry = document.getElementById('registryList');
+  const mobile = document.getElementById('mobileFilter');
+  const search = document.getElementById('catalogSearch');
+  if (!grid) return;
 
-function injectCartUI() {
-  if (document.getElementById('cartSidebar')) return;
+  const params = new URLSearchParams(window.location.search);
+  let activeCat = params.get('cat') || 'all';
 
-  const html = `
-    <div class="cart-overlay" id="cartOverlay"></div>
-    <aside class="cart-sidebar" id="cartSidebar" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
-      <div class="cart-sidebar__header">
-        <div>
-          <p class="cart-sidebar__kicker">Заказ</p>
-          <h2 class="cart-sidebar__title" id="cartTitle">Корзина</h2>
-        </div>
-        <button class="cart-sidebar__close" id="cartClose" type="button" aria-label="Закрыть корзину">
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="cart-sidebar__items cart-items-view" id="cartItems"></div>
-      <form class="checkout-form" id="checkoutForm" novalidate>
-        <button type="button" class="form-back" id="backToCart">← Назад к корзине</button>
-        <p class="checkout-form__lead">Оставим контакты — заказ уйдёт в Telegram.</p>
-        <div class="form-group">
-          <label for="customerName">Имя *</label>
-          <input type="text" id="customerName" name="name" required autocomplete="name" placeholder="Как к вам обращаться">
-        </div>
-        <div class="form-group">
-          <label for="customerPhone">Телефон *</label>
-          <input type="tel" id="customerPhone" name="phone" required autocomplete="tel" placeholder="+7 (___) ___-__-__">
-        </div>
-        <div class="form-group">
-          <label for="customerCity">Город *</label>
-          <input type="text" id="customerCity" name="city" required autocomplete="address-level2" placeholder="Город доставки или самовывоза">
-        </div>
-        <div class="form-group">
-          <label for="customerType">Вы *</label>
-          <select id="customerType" name="clientType" required>
-            <option value="">Салон или частный мастер</option>
-            <option value="Салон">Салон</option>
-            <option value="Частный мастер">Частный мастер</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-checkbox">
-            <input type="checkbox" id="needsDelivery" name="needsDelivery">
-            <span>Нужна доставка</span>
-          </label>
-          <p class="form-hint">Если не отмечено — самовывоз в Санкт-Петербурге</p>
-        </div>
-        <div class="checkout-form__delivery" id="deliveryFields" hidden>
-          <div class="form-group">
-            <label for="deliveryMethod">Способ доставки</label>
-            <select id="deliveryMethod" name="delivery">
-              <option value="">Выберите способ</option>
-              <option value="СДЭК">СДЭК</option>
-              <option value="Почта России">Почта России</option>
-              <option value="Boxberry">Boxberry</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="customerAddress">Адрес доставки</label>
-            <textarea id="customerAddress" name="address" placeholder="Адрес сейчас или уточните менеджеру в Telegram"></textarea>
-          </div>
-        </div>
-        <div class="form-message" id="formMessage"></div>
-        <button type="submit" class="btn btn--accent btn--full" id="submitOrder">Отправить в Telegram</button>
-      </form>
-      <div class="cart-sidebar__footer" id="cartFooter">
-        <div class="cart-sidebar__total">
-          <span class="cart-sidebar__total-label">Итого</span>
-          <span class="cart-sidebar__total-value" id="cartTotal">${PRICE_LABEL}</span>
-        </div>
-        <p class="cart-sidebar__price-hint" id="cartPriceHint">${PRICE_HINT}</p>
-        <button class="btn btn--accent btn--full" id="checkoutBtn" type="button">Оформить заказ</button>
-      </div>
-    </aside>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  `;
+  const renderFilters = () => {
+    const mkBtn = (cat, mobileMode = false) => {
+      const active = cat.id === activeCat;
+      if (mobileMode) {
+        return `<button type="button" class="${active ? 'active' : ''}" data-cat="${cat.id}" role="tab" aria-selected="${active}">${cat.label}</button>`;
+      }
+      return `<li class="registry-list__item" role="presentation">
+        <button type="button" class="registry-list__btn ${active ? 'registry-list__btn--active' : ''}" data-cat="${cat.id}" role="tab" aria-selected="${active}">${cat.label}</button>
+      </li>`;
+    };
 
-  document.body.insertAdjacentHTML('beforeend', html);
-}
-
-function getCartFocusable() {
-  const sidebar = document.getElementById('cartSidebar');
-  if (!sidebar) return [];
-  return [...sidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(
-    (el) => el.offsetParent !== null || el === document.activeElement
-  );
-}
-
-function openCart() {
-  updateCartUI();
-  const sidebar = document.getElementById('cartSidebar');
-  document.getElementById('cartOverlay')?.classList.add('cart-overlay--open');
-  sidebar?.classList.add('cart-sidebar--open');
-  sidebar?.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('cart-open');
-  document.body.style.overflow = 'hidden';
-  hideCheckout();
-  window.requestAnimationFrame(() => {
-    document.getElementById('cartClose')?.focus();
-  });
-}
-
-function closeCart() {
-  const sidebar = document.getElementById('cartSidebar');
-  document.getElementById('cartOverlay')?.classList.remove('cart-overlay--open');
-  sidebar?.classList.remove('cart-sidebar--open');
-  sidebar?.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('cart-open');
-  document.body.style.overflow = '';
-  document.getElementById('cartBtn')?.focus();
-}
-
-function showCheckout() {
-  const cart = getCart();
-  if (cart.length === 0) {
-    showToast('Корзина пуста');
-    return;
-  }
-
-  document.getElementById('cartItems')?.classList.add('cart-items-view--hidden');
-  document.getElementById('checkoutForm')?.classList.add('checkout-form--active');
-  document.getElementById('cartFooter').style.display = 'none';
-}
-
-function hideCheckout() {
-  document.getElementById('cartItems')?.classList.remove('cart-items-view--hidden');
-  document.getElementById('checkoutForm')?.classList.remove('checkout-form--active');
-  document.getElementById('cartFooter').style.display = '';
-  const needsDelivery = document.getElementById('needsDelivery');
-  const deliveryFields = document.getElementById('deliveryFields');
-  if (needsDelivery) needsDelivery.checked = false;
-  if (deliveryFields) deliveryFields.hidden = true;
-  const form = document.getElementById('checkoutForm');
-  if (form) clearFormFieldErrors(form);
-  const msg = document.getElementById('formMessage');
-  if (msg) {
-    msg.className = 'form-message';
-    msg.textContent = '';
-  }
-}
-
-function updateCartUI() {
-  const cart = getCart();
-  const count = getCartCount();
-
-  const countEl = document.querySelector('.cart-btn__count');
-  if (countEl) {
-    countEl.textContent = `(${count})`;
-    countEl.dataset.count = count;
-  }
-
-  const cartBtn = document.getElementById('cartBtn');
-  if (cartBtn) {
-    cartBtn.setAttribute('aria-label', `Корзина, товаров: ${count}`);
-  }
-
-  const totalEl = document.getElementById('cartTotal');
-  if (totalEl) totalEl.textContent = formatCartTotal(cart);
-
-  const hintEl = document.getElementById('cartPriceHint');
-  if (hintEl) {
-    const { hasPriced, hasUnpriced } = getCartPricing(cart);
-    if (hasPriced && !hasUnpriced) {
-      hintEl.textContent = '';
-      hintEl.hidden = true;
-    } else if (hasPriced && hasUnpriced) {
-      hintEl.hidden = false;
-      hintEl.textContent = 'Позиции без цены в каталоге — уточним в Telegram';
-    } else {
-      hintEl.hidden = false;
-      hintEl.textContent = PRICE_HINT;
+    if (registry) {
+      registry.innerHTML = categories.map((c) => mkBtn(c)).join('');
     }
-  }
+    if (mobile) {
+      mobile.innerHTML = categories.map((c) => mkBtn(c, true)).join('');
+    }
+  };
 
-  updateProductCardButtons();
+  const applyFilter = (cat) => {
+    activeCat = cat;
+    renderFilters();
+    const { html, count } = buildCatalogGrid(activeCat, search?.value || '');
+    grid.innerHTML = html;
+    bindShelfCart(grid);
+    const countEl = document.getElementById('catalogCount');
+    if (countEl) countEl.textContent = `показано ${count} из ${products.length}`;
 
-  const itemsEl = document.getElementById('cartItems');
-  if (!itemsEl) return;
+    const url = new URL(window.location.href);
+    if (cat === 'all') url.searchParams.delete('cat');
+    else url.searchParams.set('cat', cat);
+    window.history.replaceState({}, '', url);
+  };
 
-  if (cart.length === 0) {
-    itemsEl.innerHTML = `
-      <div class="cart-empty">
-        <p class="cart-empty__title">Пока пусто</p>
-        <p class="cart-empty__text">Добавьте линейки из каталога — оформим заказ в Telegram.</p>
-        <a href="/catalog.html" class="btn btn--primary btn--sm cart-empty__cta">Смотреть каталог</a>
-      </div>
-    `;
-    return;
-  }
+  renderFilters();
+  applyFilter(activeCat);
 
-  itemsEl.innerHTML = cart
-    .map((item, i) => {
-      const product = products.find((p) => p.id === item.id);
-      if (!product) return '';
-      return `
-        <div class="cart-item" data-id="${item.id}">
-          <div class="cart-item__media">
-            <span class="cart-item__blush" aria-hidden="true"></span>
-            <div class="cart-item__image">
-              <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
-            </div>
-          </div>
-          <div class="cart-item__info">
-            <div class="cart-item__top">
-              <span class="cart-item__index">${padSlideIndex(i + 1)}</span>
-              <button class="cart-item__remove" data-action="remove" data-id="${item.id}" type="button">Удалить</button>
-            </div>
-            <div class="cart-item__name">${product.name}</div>
-            <div class="cart-item__price">${formatPrice(product)}${item.qty > 1 ? ` × ${item.qty}` : ''}</div>
-            <div class="cart-item__qty">
-              <button class="cart-item__qty-btn" data-action="decrease" data-id="${item.id}" type="button" aria-label="Уменьшить">−</button>
-              <span class="cart-item__qty-value">${item.qty}</span>
-              <button class="cart-item__qty-btn" data-action="increase" data-id="${item.id}" type="button" aria-label="Увеличить">+</button>
-            </div>
-          </div>
-        </div>
-      `;
-    })
-    .join('');
+  const onFilterClick = (e) => {
+    const btn = e.target.closest('[data-cat]');
+    if (!btn) return;
+    applyFilter(btn.dataset.cat);
+  };
 
-  itemsEl.querySelectorAll('[data-action]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-      const item = cart.find((i) => i.id === id);
-
-      if (action === 'increase') updateQty(id, (item?.qty || 0) + 1);
-      if (action === 'decrease') updateQty(id, (item?.qty || 0) - 1);
-      if (action === 'remove') removeFromCart(id);
-
-      updateCartUI();
-    });
-  });
+  registry?.addEventListener('click', onFilterClick);
+  mobile?.addEventListener('click', onFilterClick);
+  search?.addEventListener('input', () => applyFilter(activeCat));
 }
 
 function buildOrderMessage(formData) {
@@ -625,7 +426,7 @@ function buildOrderMessage(formData) {
   let costLine = 'Стоимость: цена по запросу — прайс в Telegram';
   if (hasPriced) {
     costLine = hasUnpriced
-      ? `Итого по позициям с ценой: ${formatRubles(total)} (остальное — уточним в Telegram)`
+      ? `Итого по позициям с ценой: ${formatRubles(total)} (остальное — уточним)`
       : `Итого: ${formatRubles(total)}`;
   }
 
@@ -646,75 +447,175 @@ function buildOrderMessage(formData) {
     'Доставка:',
     formData.needsDelivery
       ? [
-          formData.delivery ? `Способ: ${formData.delivery}` : 'Способ: уточнить в Telegram',
-          formData.address ? `Адрес: ${formData.address}` : 'Адрес: уточнить в Telegram',
+          formData.delivery ? `Способ: ${formData.delivery}` : 'Способ: уточнить',
+          formData.address ? `Адрес: ${formData.address}` : 'Адрес: уточнить',
         ].join('\n')
       : 'Самовывоз (СПб)',
-  ]
-    .filter(Boolean)
-    .join('\n');
+  ].join('\n');
 }
 
-function clearFormFieldErrors(form) {
-  form.querySelectorAll('[aria-invalid="true"]').forEach((el) => {
-    el.removeAttribute('aria-invalid');
-  });
-  document.getElementById('checkoutErrorSummary')?.remove();
+function initOrder() {
+  renderOrderBody();
+  renderOrderForm();
 }
 
-function showCheckoutErrorSummary(form, errors) {
-  clearFormFieldErrors(form);
-  errors.forEach(({ field }) => {
-    const el = form.elements.namedItem(field);
-    if (el && 'setAttribute' in el) el.setAttribute('aria-invalid', 'true');
-  });
+function renderOrderBody() {
+  const body = document.getElementById('orderBody');
+  const header = document.getElementById('orderHeader');
+  const aside = document.getElementById('orderAside');
+  const cart = getCart();
 
-  let summary = document.getElementById('checkoutErrorSummary');
-  if (!summary) {
-    summary = document.createElement('div');
-    summary.id = 'checkoutErrorSummary';
-    summary.className = 'form-error-summary';
-    summary.setAttribute('role', 'alert');
-    summary.setAttribute('tabindex', '-1');
-    form.prepend(summary);
+  if (!body) return;
+
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <div class="order-empty">
+        <p class="order-empty__title">В заказе пусто</p>
+        <p>Добавьте линейки из каталога — оформим наряд-заказ.</p>
+        <p style="margin-top:24px"><a href="/catalog.html" class="btn btn--on-dark">Открыть каталог</a></p>
+      </div>`;
+    if (aside) aside.hidden = true;
+    return;
   }
 
-  const title = document.createElement('p');
-  title.className = 'form-error-summary__title';
-  title.id = 'checkoutErrorTitle';
-  title.textContent = 'Проверьте поля формы';
-  summary.setAttribute('aria-labelledby', 'checkoutErrorTitle');
-  summary.replaceChildren(title);
+  if (aside) aside.hidden = false;
 
-  const list = document.createElement('ul');
-  list.className = 'form-error-summary__list';
-  errors.forEach(({ field, label, message }) => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    const input = form.elements.namedItem(field);
-    const id = input && 'id' in input ? input.id : field;
-    a.href = `#${id}`;
-    a.textContent = message || label;
-    a.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const target = document.getElementById(id);
-      target?.focus();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU');
+  if (header) {
+    header.textContent = `FILO Professional · заказ · ${dateStr}`;
+  }
+
+  body.innerHTML = `
+    <table class="order-table">
+      <thead>
+        <tr>
+          <th>Позиция</th>
+          <th>Линейка</th>
+          <th>Объём</th>
+          <th>Кол-во</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cart
+          .map((item, i) => {
+            const p = products.find((x) => x.id === item.id);
+            if (!p) return '';
+            return `<tr data-id="${item.id}">
+              <td class="mono">${String(i + 1).padStart(2, '0')} · ${p.name}</td>
+              <td>${p.categoryLabel}</td>
+              <td class="mono">${p.volume}</td>
+              <td>
+                <div class="order-qty">
+                  <button type="button" data-action="decrease" aria-label="Меньше">−</button>
+                  <span class="mono">${item.qty}</span>
+                  <button type="button" data-action="increase" aria-label="Больше">+</button>
+                </div>
+              </td>
+              <td><button type="button" class="order-remove" data-action="remove" aria-label="Удалить">×</button></td>
+            </tr>`;
+          })
+          .join('')}
+      </tbody>
+    </table>`;
+
+  body.querySelectorAll('[data-action]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('[data-id]');
+      const id = row?.dataset.id;
+      if (!id) return;
+      const item = cart.find((c) => c.id === id);
+      const action = btn.dataset.action;
+      if (action === 'increase') updateQty(id, (item?.qty || 0) + 1);
+      if (action === 'decrease') updateQty(id, (item?.qty || 0) - 1);
+      if (action === 'remove') removeFromCart(id);
+      updateOrderLink();
+      renderOrderBody();
+      updateOrderPreview();
     });
-    li.append(a);
-    list.append(li);
   });
-  summary.append(list);
-  summary.focus();
+
+  updateOrderPreview();
 }
 
-async function handleOrderSubmit(e) {
-  e.preventDefault();
+function renderOrderForm() {
+  const wrap = document.getElementById('orderFormWrap');
+  if (!wrap || wrap.dataset.bound) return;
+  wrap.dataset.bound = '1';
 
-  const form = e.target;
-  const submitBtn = document.getElementById('submitOrder');
-  const messageEl = document.getElementById('formMessage');
+  wrap.innerHTML = `
+    <form class="order-form" id="orderForm" novalidate>
+      <p class="order-preview-label">Что уйдёт оператору</p>
+      <pre class="order-preview" id="orderPreview"></pre>
+      <div class="form-group">
+        <label for="customerName">Имя</label>
+        <input type="text" id="customerName" name="name" required autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="customerPhone">Телефон</label>
+        <input type="tel" id="customerPhone" name="phone" required autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label for="customerCity">Город</label>
+        <input type="text" id="customerCity" name="city" required autocomplete="address-level2">
+      </div>
+      <div class="form-group">
+        <label for="customerType">Вы</label>
+        <select id="customerType" name="clientType" required>
+          <option value="">Салон или мастер</option>
+          <option value="Салон">Салон</option>
+          <option value="Частный мастер">Частный мастер</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-checkbox">
+          <input type="checkbox" id="needsDelivery" name="needsDelivery">
+          <span>Нужна доставка</span>
+        </label>
+        <p class="form-hint">Без отметки — самовывоз в Санкт-Петербурге</p>
+      </div>
+      <div id="deliveryFields" hidden>
+        <div class="form-group">
+          <label for="deliveryMethod">Способ</label>
+          <select id="deliveryMethod" name="delivery">
+            <option value="">Выберите</option>
+            <option value="СДЭК">СДЭК</option>
+            <option value="Почта России">Почта России</option>
+            <option value="Boxberry">Boxberry</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="customerAddress">Адрес</label>
+          <textarea id="customerAddress" name="address" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="form-message" id="formMessage"></div>
+      <button type="submit" class="btn btn--oxide btn--full" id="submitOrder">Отправить в Telegram</button>
+      <p class="form-hint" style="margin-top:12px">Откроется Telegram. Ничего не спишется.</p>
+    </form>`;
 
-  const formData = {
+  document.getElementById('needsDelivery')?.addEventListener('change', (e) => {
+    const fields = document.getElementById('deliveryFields');
+    if (fields) fields.hidden = !e.target.checked;
+    updateOrderPreview();
+  });
+
+  ['customerName', 'customerPhone', 'customerCity', 'customerType', 'deliveryMethod', 'customerAddress'].forEach(
+    (id) => {
+      document.getElementById(id)?.addEventListener('input', updateOrderPreview);
+      document.getElementById(id)?.addEventListener('change', updateOrderPreview);
+    }
+  );
+
+  document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
+  updateOrderPreview();
+}
+
+function getFormData() {
+  const form = document.getElementById('orderForm');
+  if (!form) return null;
+  return {
     name: form.name.value.trim(),
     phone: form.phone.value.trim(),
     city: form.city.value.trim(),
@@ -723,41 +624,80 @@ async function handleOrderSubmit(e) {
     delivery: form.delivery.value,
     address: form.address.value.trim(),
   };
+}
 
-  const errors = [];
-  if (!formData.name) errors.push({ field: 'name', label: 'Имя', message: 'Укажите имя' });
-  if (!formData.phone) errors.push({ field: 'phone', label: 'Телефон', message: 'Укажите телефон' });
-  if (!formData.city) errors.push({ field: 'city', label: 'Город', message: 'Укажите город' });
-  if (!formData.clientType) errors.push({ field: 'clientType', label: 'Тип', message: 'Выберите салон или частного мастера' });
-  if (formData.needsDelivery && !formData.delivery) {
-    errors.push({ field: 'delivery', label: 'Доставка', message: 'Выберите способ доставки' });
+function updateOrderPreview() {
+  const preview = document.getElementById('orderPreview');
+  const cart = getCart();
+  if (!preview || cart.length === 0) return;
+
+  const fd = getFormData();
+  if (!fd || !fd.name) {
+    preview.textContent = buildOrderMessage({
+      name: '…',
+      phone: '…',
+      city: '…',
+      clientType: '…',
+      needsDelivery: fd?.needsDelivery || false,
+      delivery: fd?.delivery || '',
+      address: fd?.address || '',
+    });
+    return;
   }
+  preview.textContent = buildOrderMessage(fd);
+}
 
-  if (errors.length) {
-    showCheckoutErrorSummary(form, errors);
+async function handleOrderSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const submitBtn = document.getElementById('submitOrder');
+  const messageEl = document.getElementById('formMessage');
+  const cart = getCart();
+
+  if (cart.length === 0) {
+    showToast('Корзина пуста');
     return;
   }
 
-  clearFormFieldErrors(form);
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Отправка...';
-  messageEl.className = 'form-message';
-  messageEl.textContent = '';
+  const formData = getFormData();
+  const errors = [];
+  if (!formData.name) errors.push('name');
+  if (!formData.phone) errors.push('phone');
+  if (!formData.city) errors.push('city');
+  if (!formData.clientType) errors.push('clientType');
+  if (formData.needsDelivery && !formData.delivery) errors.push('delivery');
+
+  if (errors.length) {
+    messageEl.className = 'form-message';
+    messageEl.textContent = 'Заполните обязательные поля';
+    errors.forEach((f) => form.elements.namedItem(f)?.setAttribute('aria-invalid', 'true'));
+    return;
+  }
+
+  form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
 
   const orderMessage = buildOrderMessage(formData);
+  submitBtn.disabled = true;
 
   if (TELEGRAM_USERNAME) {
-    const url = `${getTelegramUrl()}?text=${encodeURIComponent(orderMessage)}`;
-    window.open(url, '_blank');
+    window.open(`${getTelegramUrl()}?text=${encodeURIComponent(orderMessage)}`, '_blank');
     try {
       await navigator.clipboard.writeText(orderMessage);
     } catch (_) {
-      /* clipboard may be blocked */
+      /* ignore */
     }
+
+    const header = document.getElementById('orderHeader');
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    if (header) {
+      header.classList.add('order-header--sent');
+      header.textContent = `Отправлено в Telegram · ${time}`;
+    }
+
     messageEl.className = 'form-message form-message--success';
     messageEl.replaceChildren();
     const lead = document.createElement('p');
-    lead.textContent = 'Откроется Telegram — нажмите «Отправить». Если чат не открылся, скопируйте заказ ниже.';
+    lead.textContent = 'Нажмите «Отправить» в Telegram. Если чат не открылся — скопируйте текст ниже.';
     const area = document.createElement('textarea');
     area.className = 'form-order-copy';
     area.readOnly = true;
@@ -766,549 +706,30 @@ async function handleOrderSubmit(e) {
     const actions = document.createElement('div');
     actions.className = 'form-order-actions';
     actions.innerHTML = `
-      <button type="button" class="btn btn--secondary btn--sm" id="copyOrderBtn">Скопировать заказ</button>
-      <button type="button" class="btn btn--accent btn--sm" id="confirmOrderSent">Я отправил</button>
-    `;
+      <button type="button" class="btn btn--ghost btn--on-dark btn--sm" id="copyOrder">Скопировать</button>
+      <button type="button" class="btn btn--oxide btn--sm" id="confirmSent">Я отправил</button>`;
     messageEl.append(lead, area, actions);
-    document.getElementById('copyOrderBtn')?.addEventListener('click', async () => {
+
+    document.getElementById('copyOrder')?.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(orderMessage);
-        showToast('Заказ скопирован');
+        showToast('Скопировано');
       } catch (_) {
         document.querySelector('.form-order-copy')?.select();
       }
     });
-    document.getElementById('confirmOrderSent')?.addEventListener('click', () => {
+
+    document.getElementById('confirmSent')?.addEventListener('click', () => {
       clearCart();
-      updateCartUI();
-      form.reset();
-      hideCheckout();
-      showToast('Спасибо! Заказ отправлен');
-      closeCart();
+      updateOrderLink();
+      renderOrderBody();
+      showToast('Спасибо!');
     });
-    showToast('Переход в Telegram...');
+
+    showToast('Переход в Telegram…');
   } else {
-    messageEl.className = 'form-message form-message--error';
-    messageEl.textContent = 'Telegram не настроен. Напишите нам вручную.';
+    messageEl.textContent = 'Telegram не настроен';
   }
 
   submitBtn.disabled = false;
-  submitBtn.textContent = 'Отправить в Telegram';
-}
-
-export function showToast(text) {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = text;
-  toast.classList.add('toast--show');
-  setTimeout(() => toast.classList.remove('toast--show'), 3000);
-}
-
-function renderAddControl(productId, qty) {
-  if (qty === 0) {
-    return `
-      <button class="product-card__add add-to-cart" data-id="${productId}" type="button">
-        <span>В корзину</span>
-        <span class="product-card__add-arrow">→</span>
-      </button>`;
-  }
-
-  return `
-    <div class="product-card__add product-card__add--in-cart" data-id="${productId}">
-      <button type="button" class="product-card__add-step" data-action="decrease" aria-label="Уменьшить количество">−</button>
-      <span class="product-card__add-count" aria-live="polite">${qty}</span>
-      <button type="button" class="product-card__add-step" data-action="increase" aria-label="Увеличить количество">+</button>
-    </div>`;
-}
-
-function updateProductCardButtons() {
-  document.querySelectorAll('.product-card[data-id]').forEach((card) => {
-    const productId = card.dataset.id;
-    const qty = getItemQty(productId);
-    const control = card.querySelector('.add-to-cart, .product-card__add--in-cart');
-    if (!control) return;
-
-    const inCart = control.classList.contains('product-card__add--in-cart');
-
-    if (qty > 0 && inCart) {
-      const countEl = control.querySelector('.product-card__add-count');
-      if (countEl) countEl.textContent = qty;
-      return;
-    }
-
-    if (qty === 0 && !inCart) return;
-
-    control.outerHTML = renderAddControl(productId, qty);
-  });
-}
-
-export function renderProductCard(product, { compact = false, editorial = false, index = null } = {}) {
-  const qty = getItemQty(product.id);
-  const classes = [
-    'product-card',
-    compact ? 'product-card--compact' : '',
-    !compact ? 'product-card--expandable' : '',
-    editorial ? 'product-card--editorial' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  const indexHtml =
-    editorial && index != null
-      ? `<span class="product-card__index">${padSlideIndex(index)}</span>`
-      : '';
-
-  return `
-    <article class="${classes}" data-category="${product.category}" data-id="${product.id}">
-      <div class="product-card__media">
-        ${editorial ? '<span class="product-card__blush" aria-hidden="true"></span>' : ''}
-        <div class="product-card__image">
-          <img src="${product.image}" alt="${product.name} — ${product.categoryLabel} FILO, ${product.volume}" loading="lazy" decoding="async">
-          <span class="product-card__category">${product.categoryLabel}</span>
-          ${indexHtml}
-        </div>
-      </div>
-      <div class="product-card__body">
-        <h3 class="product-card__name">${product.name}</h3>
-        ${
-          compact
-            ? `<p class="product-card__tagline">${product.tagline}</p>`
-            : `<p class="product-card__desc">${product.description}</p><button type="button" class="product-card__expand-hint" aria-expanded="false">Подробнее</button>`
-        }
-        <div class="product-card__meta">
-          <div class="product-card__pricing">
-            <span class="product-card__price">${formatPrice(product)}</span>
-            ${
-              product.price == null
-                ? `<a class="product-card__price-hint" href="${getTelegramUrl()}?text=${encodeURIComponent(`Здравствуйте! Интересует прайс на ${product.name} (${product.categoryLabel}) для [салона/мастера].\nГород: ___.`)}" target="_blank" rel="noopener">Прайс «${product.name}» в Telegram</a>`
-                : ''
-            }
-          </div>
-          <span class="product-card__volume">${product.volume}</span>
-        </div>
-      </div>
-      ${renderAddControl(product.id, qty)}
-    </article>
-  `;
-}
-
-function bindAddToCart(container) {
-  if (container.dataset.cartBound) return;
-  container.dataset.cartBound = '1';
-
-  container.addEventListener('click', (e) => {
-    const addBtn = e.target.closest('.add-to-cart');
-    if (addBtn) {
-      e.stopPropagation();
-      addToCart(addBtn.dataset.id);
-      updateCartUI();
-      return;
-    }
-
-    const stepBtn = e.target.closest('.product-card__add-step');
-    if (!stepBtn) return;
-
-    e.stopPropagation();
-    const control = stepBtn.closest('.product-card__add--in-cart');
-    const productId = control?.dataset.id;
-    if (!productId) return;
-
-    const qty = getItemQty(productId);
-    if (stepBtn.dataset.action === 'increase') {
-      updateQty(productId, qty + 1);
-    } else {
-      updateQty(productId, qty - 1);
-    }
-    updateCartUI();
-  });
-}
-
-function bindProductCardExpand(container) {
-  container.querySelectorAll('.product-card--expandable').forEach((card) => {
-    const hint = card.querySelector('.product-card__expand-hint');
-    if (!hint || hint.dataset.expandBound) return;
-    hint.dataset.expandBound = '1';
-
-    const setExpanded = (open) => {
-      card.classList.toggle('product-card--expanded', open);
-      hint.setAttribute('aria-expanded', open ? 'true' : 'false');
-      hint.textContent = open ? 'Свернуть' : 'Подробнее';
-      if (open) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    };
-
-    hint.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const grid = card.closest('.products-grid');
-      const willOpen = !card.classList.contains('product-card--expanded');
-
-      grid?.querySelectorAll('.product-card--expanded').forEach((expandedCard) => {
-        if (expandedCard === card) return;
-        expandedCard.classList.remove('product-card--expanded');
-        const otherHint = expandedCard.querySelector('.product-card__expand-hint');
-        if (otherHint) {
-          otherHint.setAttribute('aria-expanded', 'false');
-          otherHint.textContent = 'Подробнее';
-        }
-      });
-
-      setExpanded(willOpen);
-    });
-  });
-}
-
-function padSlideIndex(n) {
-  return String(n).padStart(2, '0');
-}
-
-function initHeroSlider() {
-  const root = document.getElementById('heroSlider');
-  const track = document.getElementById('heroSliderTrack');
-  const currentEl = document.getElementById('heroSliderCurrent');
-  const totalEl = document.getElementById('heroSliderTotal');
-  const captionEl = document.getElementById('heroSliderCaption');
-  const dotsEl = document.getElementById('heroSliderDots');
-  const prevBtn = document.getElementById('heroSliderPrev');
-  const nextBtn = document.getElementById('heroSliderNext');
-  if (!track) return;
-
-  const byCat = ['volume', 'treatment', 'homecare', 'finisher']
-    .map((cat) => products.find((p) => p.category === cat))
-    .filter(Boolean);
-  const slides = byCat.length ? byCat : products.slice(0, 4);
-  if (!slides.length) return;
-
-  if (totalEl) totalEl.textContent = padSlideIndex(slides.length);
-  if (captionEl) captionEl.setAttribute('aria-live', 'polite');
-  if (root) {
-    root.setAttribute('tabindex', '0');
-    root.setAttribute('aria-roledescription', 'carousel');
-  }
-
-  track.innerHTML = slides
-    .map(
-      (p, i) => `
-    <div class="hero-slider__slide ${i === 0 ? 'hero-slider__slide--active' : ''}" data-index="${i}" ${i === 0 ? '' : 'aria-hidden="true"'}>
-      <div class="hero-slider__frame">
-        <img src="${p.image}" alt="${p.name}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async"${i === 0 ? ' fetchpriority="high"' : ''}>
-      </div>
-    </div>`
-    )
-    .join('');
-
-  if (dotsEl) {
-    dotsEl.innerHTML = slides
-      .map(
-        (p, i) => `
-      <button
-        type="button"
-        class="hero-slider__dot ${i === 0 ? 'hero-slider__dot--active' : ''}"
-        role="tab"
-        aria-selected="${i === 0 ? 'true' : 'false'}"
-        aria-label="Слайд ${padSlideIndex(i + 1)}: ${p.name}"
-        data-index="${i}"
-      ></button>`
-      )
-      .join('');
-  }
-
-  let current = 0;
-  let timer;
-  let paused = false;
-
-  function goTo(index) {
-    current = index;
-    track.querySelectorAll('.hero-slider__slide').forEach((slide, i) => {
-      const active = i === current;
-      slide.classList.toggle('hero-slider__slide--active', active);
-      slide.setAttribute('aria-hidden', active ? 'false' : 'true');
-    });
-    dotsEl?.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
-      const active = i === current;
-      dot.classList.toggle('hero-slider__dot--active', active);
-      dot.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
-    if (currentEl) currentEl.textContent = padSlideIndex(current + 1);
-    if (captionEl) captionEl.textContent = slides[current].name;
-  }
-
-  function next() {
-    goTo((current + 1) % slides.length);
-  }
-
-  function prev() {
-    goTo((current - 1 + slides.length) % slides.length);
-  }
-
-  function resetTimer() {
-    clearInterval(timer);
-    if (paused) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    timer = setInterval(next, 4800);
-  }
-
-  function pause() {
-    paused = true;
-    clearInterval(timer);
-  }
-
-  function resume() {
-    paused = false;
-    resetTimer();
-  }
-
-  track.addEventListener('click', () => {
-    next();
-    resetTimer();
-  });
-
-  prevBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    prev();
-    resetTimer();
-  });
-  nextBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    next();
-    resetTimer();
-  });
-  dotsEl?.addEventListener('click', (e) => {
-    const dot = e.target.closest('.hero-slider__dot');
-    if (!dot) return;
-    e.stopPropagation();
-    goTo(Number(dot.dataset.index));
-    resetTimer();
-  });
-
-  if (root) {
-    root.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        next();
-        resetTimer();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prev();
-        resetTimer();
-      }
-    });
-    root.addEventListener('mouseenter', pause);
-    root.addEventListener('mouseleave', resume);
-    root.addEventListener('focusin', pause);
-    root.addEventListener('focusout', (e) => {
-      if (!root.contains(e.relatedTarget)) resume();
-    });
-  }
-
-  goTo(0);
-  resetTimer();
-}
-
-function initCarousel() {
-  const track = document.getElementById('featuredProducts');
-  const prev = document.getElementById('carouselPrev');
-  const next = document.getElementById('carouselNext');
-  if (!track) return;
-
-  const hits = products.filter((p) => p.featured);
-  track.innerHTML = (hits.length ? hits : products.slice(0, 5))
-    .map((p) => renderProductCard(p, { compact: true }))
-    .join('');
-  bindAddToCart(track);
-
-  const scroll = (dir) => {
-    const amount = track.querySelector('.product-card')?.offsetWidth || 300;
-    track.parentElement.scrollBy({ left: dir * (amount + 24), behavior: 'smooth' });
-  };
-
-  prev?.addEventListener('click', () => scroll(-1));
-  next?.addEventListener('click', () => scroll(1));
-}
-
-function initHome() {
-  const trustBar = document.getElementById('trustBar');
-  if (trustBar) {
-    trustBar.innerHTML = trustItems
-      .map(
-        (item) => `
-      <div class="trust-bar__item">
-        <span class="trust-bar__rule" aria-hidden="true"></span>
-        <div>
-          <div class="trust-bar__title">${item.title}</div>
-          <div class="trust-bar__text">${item.text}</div>
-        </div>
-      </div>`
-      )
-      .join('');
-  }
-
-  const b2bEl = document.getElementById('b2bBenefits');
-  if (b2bEl) {
-    b2bEl.innerHTML = b2bBenefits
-      .map(
-        (item) => `
-      <article class="benefit-row">
-        <span class="benefit-row__index" aria-hidden="true">${item.icon}</span>
-        <div class="benefit-row__body">
-          <h3 class="benefit-row__title">${item.title}</h3>
-          <p class="benefit-row__text">${item.text}</p>
-        </div>
-      </article>`
-      )
-      .join('');
-  }
-
-  const categoryGrid = document.getElementById('categoryGrid');
-  if (categoryGrid) {
-    categoryGrid.innerHTML = productLines
-      .map(
-        (line, i) => `
-      <a href="${line.href}" class="category-tile">
-        <div class="category-tile__media">
-          <span class="category-tile__blush" aria-hidden="true"></span>
-          <div class="category-tile__frame">
-            <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
-          </div>
-          <span class="category-tile__index">${padSlideIndex(i + 1)}</span>
-        </div>
-        <div class="category-tile__body">
-          <h3 class="category-tile__title">${line.title}</h3>
-          ${line.subtitle ? `<p class="category-tile__subtitle">${line.subtitle}</p>` : ''}
-          <span class="category-tile__link">Смотреть</span>
-        </div>
-      </a>`
-      )
-      .join('');
-  }
-
-  initHeroSlider();
-  initCarousel();
-}
-
-function renderCatalogFilters(activeCat) {
-  const tabs = document.getElementById('filterTabs');
-  if (!tabs) return;
-
-  tabs.innerHTML = categories
-    .map((cat, i) => {
-      const index = cat.id === 'all' ? '' : `<span class="filter-tab__index">${padSlideIndex(i)}</span>`;
-      return `
-        <button
-          type="button"
-          class="filter-tab ${cat.id === activeCat ? 'filter-tab--active' : ''}"
-          data-cat="${cat.id}"
-          role="tab"
-          aria-selected="${cat.id === activeCat ? 'true' : 'false'}"
-        >
-          ${index}
-          <span class="filter-tab__label">${cat.label}</span>
-        </button>`;
-    })
-    .join('');
-}
-
-function updateCatalogRhythm(grid) {
-  if (!grid) return;
-
-  const visible = [...grid.querySelectorAll('.product-card')].filter(
-    (card) => card.style.display !== 'none'
-  );
-
-  visible.forEach((card, i) => {
-    card.classList.toggle('product-card--offset', i % 2 === 1);
-    card.classList.toggle('product-card--chapter', (i + 1) % 5 === 0);
-    const indexEl = card.querySelector('.product-card__index');
-    if (indexEl) indexEl.textContent = padSlideIndex(i + 1);
-  });
-}
-
-function initCatalog() {
-  const grid = document.getElementById('catalogProducts');
-  const tabs = document.getElementById('filterTabs');
-  if (!grid) return;
-
-  const params = new URLSearchParams(window.location.search);
-  const initialCat = params.get('cat') || 'all';
-
-  renderCatalogFilters(initialCat);
-
-  grid.innerHTML = products
-    .map((p, i) => renderProductCard(p, { editorial: true, index: i + 1 }))
-    .join('');
-  bindAddToCart(grid);
-  bindProductCardExpand(grid);
-  filterProducts(initialCat);
-
-  if (tabs) {
-    const syncTablist = (activeBtn) => {
-      tabs.querySelectorAll('.filter-tab').forEach((t) => {
-        const active = t === activeBtn;
-        t.classList.toggle('filter-tab--active', active);
-        t.setAttribute('aria-selected', active ? 'true' : 'false');
-        t.tabIndex = active ? 0 : -1;
-      });
-    };
-
-    tabs.querySelectorAll('.filter-tab').forEach((t) => {
-      t.tabIndex = t.getAttribute('aria-selected') === 'true' ? 0 : -1;
-    });
-
-    tabs.addEventListener('click', (event) => {
-      const tab = event.target.closest('.filter-tab');
-      if (!tab) return;
-
-      const cat = tab.dataset.cat;
-      syncTablist(tab);
-      filterProducts(cat);
-
-      const url = new URL(window.location.href);
-      if (cat === 'all') url.searchParams.delete('cat');
-      else url.searchParams.set('cat', cat);
-      window.history.replaceState({}, '', url);
-    });
-
-    tabs.addEventListener('keydown', (event) => {
-      const list = [...tabs.querySelectorAll('.filter-tab')];
-      const i = list.indexOf(document.activeElement);
-      if (i < 0) return;
-
-      let next = -1;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % list.length;
-      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i - 1 + list.length) % list.length;
-      else if (event.key === 'Home') next = 0;
-      else if (event.key === 'End') next = list.length - 1;
-      else return;
-
-      event.preventDefault();
-      list[next].focus();
-      list[next].click();
-    });
-  }
-}
-
-function filterProducts(category) {
-  const grid = document.getElementById('catalogProducts');
-  let visible = 0;
-
-  document.querySelectorAll('#catalogProducts .product-card').forEach((card) => {
-    const show = category === 'all' || card.dataset.category === category;
-    card.style.display = show ? '' : 'none';
-    if (show) visible += 1;
-  });
-
-  updateCatalogRhythm(grid);
-
-  const countEl = document.getElementById('catalogCount');
-  if (countEl) {
-    countEl.textContent = `${visible} ${pluralProducts(visible)}`;
-  }
-}
-
-function pluralProducts(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 19) return 'товаров';
-  if (mod10 === 1) return 'товар';
-  if (mod10 >= 2 && mod10 <= 4) return 'товара';
-  return 'товаров';
 }
