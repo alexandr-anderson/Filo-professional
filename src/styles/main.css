@@ -1625,8 +1625,9 @@ body.cookie-visible {
 .shelf-cell--statement {
   justify-content: center;
   gap: 12px;
-  padding: clamp(22px, 2.4vw, 34px);
+  padding: clamp(20px, 2vw, 30px);
   background: linear-gradient(168deg, rgba(111, 143, 132, 0.5) 0%, rgba(202, 214, 206, 0.9) 42%, rgba(243, 241, 236, 0.96) 100%);
+  min-height: 100%;
 }
 
 .shelf-cell--statement:hover {
@@ -1647,13 +1648,14 @@ body.cookie-visible {
 }
 
 .shelf-cell__statement-title {
-  font-size: clamp(1.06rem, 1rem + 0.4vw, 1.34rem);
+  font-size: clamp(1rem, 0.92rem + 0.35vw, 1.25rem);
   font-weight: 600;
+  line-height: 1.25;
 }
 
 .shelf-cell__statement-text {
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: clamp(0.8rem, 0.76rem + 0.2vw, 0.88rem);
+  line-height: 1.5;
   color: var(--charcoal-muted);
 }
 
@@ -2769,7 +2771,13 @@ dialog > footer,
   }
 
   .shelf-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .shelf-cell--statement {
+    grid-column: 1 / -1;
+    min-height: auto;
+    padding: 24px 20px;
   }
 
   .catalog-toolbar {
