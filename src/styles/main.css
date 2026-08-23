@@ -516,7 +516,7 @@ body.cookie-visible {
 
 .glass-pane--main-statement .pane-content {
   padding: clamp(24px, 3.4vw, 64px);
-  max-width: 46ch;
+  max-width: min(100%, 660px);
 }
 
 .glass-title {
@@ -530,6 +530,7 @@ body.cookie-visible {
 }
 
 .glass-subtitle {
+  max-width: 34ch;
   margin-top: clamp(18px, 2vw, 30px);
   padding-top: clamp(16px, 1.8vw, 26px);
   border-top: 1px solid rgba(14, 14, 14, 0.22);
@@ -544,13 +545,10 @@ body.cookie-visible {
   display: grid;
   place-items: center;
   padding: clamp(28px, 3vw, 56px) clamp(18px, 2vw, 36px);
-  background: var(--cobalt-gradient);
   color: #fff;
-  box-shadow: var(--cobalt-glow);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
+/* Специфичность нужна, чтобы перекрыть матовое стекло `.glass-wall .glass-pane` */
 .glass-wall .glass-pane--cobalt-highlight {
   background: var(--cobalt-gradient);
   -webkit-backdrop-filter: none;
@@ -660,15 +658,17 @@ body.cookie-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 44% 56%;
+  object-position: 50% 56%;
   filter: grayscale(0.22) brightness(1.05) contrast(1.03);
-  transform: scale(1.95);
+  /* Кратность 2× кадрирует фотографию так, что её собственный переплёт
+     ложится ровно по правому краю створки, а слева остаётся чистое рифление. */
+  transform: scale(2);
   transition: transform var(--dur-slow) var(--ease-glass),
     filter var(--dur-slow) var(--ease-glass);
 }
 
 .glass-pane--product-silhouette:hover .glass-silhouetted-bottle img {
-  transform: scale(2.01);
+  transform: scale(2.06);
   filter: grayscale(0.06) brightness(1.09) contrast(1.05);
 }
 
