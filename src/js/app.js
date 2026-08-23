@@ -35,8 +35,8 @@ const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
 
 const STATEMENTS = [
   {
-    title: 'Остатки и цены',
-    text: 'Актуальный прайс для салонов и мастеров — в Telegram после заказа.',
+    title: 'Особые условия',
+    text: 'А также скидки и особые условия для салонов и мастеров — уточняйте в Telegram',
     tone: 'celadon',
   },
   {
