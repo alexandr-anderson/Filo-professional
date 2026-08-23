@@ -291,27 +291,45 @@ function initMobileMenu() {
 function initCookieConsent() {
   if (localStorage.getItem(COOKIE_CONSENT_KEY) || document.getElementById('cookieConsent')) return;
 
-  document.body.insertAdjacentHTML(
-    'beforeend',
-    `
+  const show = () => {
+    if (document.getElementById('cookieConsent') || localStorage.getItem(COOKIE_CONSENT_KEY)) return;
+
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
     <div class="cookie-consent" id="cookieConsent" role="dialog" aria-live="polite" aria-label="Согласие на использование cookie">
       <div class="container cookie-consent__inner">
         <p class="cookie-consent__text">
-          Мы используем cookie для работы сайта и сохранения корзины.
-          <a href="/privacy.html">Политика конфиденциальности</a>.
-          Нажимая «Принять», вы соглашаетесь с их использованием.
+          Cookie для работы сайта и корзины.
+          <a href="/privacy.html">Политика</a>
         </p>
         <button type="button" class="btn btn--primary btn--sm cookie-consent__btn" id="cookieConsentAccept">
           Принять
         </button>
       </div>
     </div>`
-  );
+    );
 
-  document.getElementById('cookieConsentAccept')?.addEventListener('click', () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-    document.getElementById('cookieConsent')?.remove();
-  });
+    document.body.classList.add('cookie-visible');
+    const accept = document.getElementById('cookieConsentAccept');
+    accept?.addEventListener('click', () => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+      document.getElementById('cookieConsent')?.remove();
+      document.body.classList.remove('cookie-visible');
+    });
+    window.requestAnimationFrame(() => accept?.focus());
+  };
+
+  // Не перекрывать первый экран сразу — после скролла или короткой паузы
+  let shown = false;
+  const once = () => {
+    if (shown) return;
+    shown = true;
+    window.removeEventListener('scroll', once);
+    show();
+  };
+  window.addEventListener('scroll', once, { passive: true });
+  window.setTimeout(once, 2800);
 }
 
 function initCart() {
@@ -374,7 +392,7 @@ function injectCartUI() {
         </button>
       </div>
       <div class="cart-sidebar__items cart-items-view" id="cartItems"></div>
-      <form class="checkout-form" id="checkoutForm">
+      <form class="checkout-form" id="checkoutForm" novalidate>
         <button type="button" class="form-back" id="backToCart">← Назад к корзине</button>
         <p class="checkout-form__lead">Оставим контакты — заказ уйдёт в Telegram.</p>
         <div class="form-group">
@@ -489,6 +507,8 @@ function hideCheckout() {
   const deliveryFields = document.getElementById('deliveryFields');
   if (needsDelivery) needsDelivery.checked = false;
   if (deliveryFields) deliveryFields.hidden = true;
+  const form = document.getElementById('checkoutForm');
+  if (form) clearFormFieldErrors(form);
   const msg = document.getElementById('formMessage');
   if (msg) {
     msg.className = 'form-message';
@@ -635,6 +655,58 @@ function buildOrderMessage(formData) {
     .join('\n');
 }
 
+function clearFormFieldErrors(form) {
+  form.querySelectorAll('[aria-invalid="true"]').forEach((el) => {
+    el.removeAttribute('aria-invalid');
+  });
+  document.getElementById('checkoutErrorSummary')?.remove();
+}
+
+function showCheckoutErrorSummary(form, errors) {
+  clearFormFieldErrors(form);
+  errors.forEach(({ field }) => {
+    const el = form.elements.namedItem(field);
+    if (el && 'setAttribute' in el) el.setAttribute('aria-invalid', 'true');
+  });
+
+  let summary = document.getElementById('checkoutErrorSummary');
+  if (!summary) {
+    summary = document.createElement('div');
+    summary.id = 'checkoutErrorSummary';
+    summary.className = 'form-error-summary';
+    summary.setAttribute('role', 'alert');
+    summary.setAttribute('tabindex', '-1');
+    form.prepend(summary);
+  }
+
+  const title = document.createElement('p');
+  title.className = 'form-error-summary__title';
+  title.id = 'checkoutErrorTitle';
+  title.textContent = 'Проверьте поля формы';
+  summary.setAttribute('aria-labelledby', 'checkoutErrorTitle');
+  summary.replaceChildren(title);
+
+  const list = document.createElement('ul');
+  list.className = 'form-error-summary__list';
+  errors.forEach(({ field, label, message }) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    const input = form.elements.namedItem(field);
+    const id = input && 'id' in input ? input.id : field;
+    a.href = `#${id}`;
+    a.textContent = message || label;
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const target = document.getElementById(id);
+      target?.focus();
+    });
+    li.append(a);
+    list.append(li);
+  });
+  summary.append(list);
+  summary.focus();
+}
+
 async function handleOrderSubmit(e) {
   e.preventDefault();
 
@@ -652,6 +724,21 @@ async function handleOrderSubmit(e) {
     address: form.address.value.trim(),
   };
 
+  const errors = [];
+  if (!formData.name) errors.push({ field: 'name', label: 'Имя', message: 'Укажите имя' });
+  if (!formData.phone) errors.push({ field: 'phone', label: 'Телефон', message: 'Укажите телефон' });
+  if (!formData.city) errors.push({ field: 'city', label: 'Город', message: 'Укажите город' });
+  if (!formData.clientType) errors.push({ field: 'clientType', label: 'Тип', message: 'Выберите салон или частного мастера' });
+  if (formData.needsDelivery && !formData.delivery) {
+    errors.push({ field: 'delivery', label: 'Доставка', message: 'Выберите способ доставки' });
+  }
+
+  if (errors.length) {
+    showCheckoutErrorSummary(form, errors);
+    return;
+  }
+
+  clearFormFieldErrors(form);
   submitBtn.disabled = true;
   submitBtn.textContent = 'Отправка...';
   messageEl.className = 'form-message';
@@ -786,12 +873,16 @@ export function renderProductCard(product, { compact = false, editorial = false,
         ${
           compact
             ? `<p class="product-card__tagline">${product.tagline}</p>`
-            : `<p class="product-card__desc">${product.description}</p><span class="product-card__expand-hint">Подробнее</span>`
+            : `<p class="product-card__desc">${product.description}</p><button type="button" class="product-card__expand-hint" aria-expanded="false">Подробнее</button>`
         }
         <div class="product-card__meta">
           <div class="product-card__pricing">
             <span class="product-card__price">${formatPrice(product)}</span>
-            ${product.price == null ? `<span class="product-card__price-hint">${PRICE_HINT}</span>` : ''}
+            ${
+              product.price == null
+                ? `<a class="product-card__price-hint" href="${getTelegramUrl()}?text=${encodeURIComponent(`Здравствуйте! Интересует прайс на ${product.name} (${product.categoryLabel}) для [салона/мастера].\nГород: ___.`)}" target="_blank" rel="noopener">Прайс «${product.name}» в Telegram</a>`
+                : ''
+            }
           </div>
           <span class="product-card__volume">${product.volume}</span>
         </div>
@@ -834,33 +925,34 @@ function bindAddToCart(container) {
 
 function bindProductCardExpand(container) {
   container.querySelectorAll('.product-card--expandable').forEach((card) => {
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-expanded', 'false');
+    const hint = card.querySelector('.product-card__expand-hint');
+    if (!hint || hint.dataset.expandBound) return;
+    hint.dataset.expandBound = '1';
 
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.add-to-cart, .product-card__add--in-cart')) return;
+    const setExpanded = (open) => {
+      card.classList.toggle('product-card--expanded', open);
+      hint.setAttribute('aria-expanded', open ? 'true' : 'false');
+      hint.textContent = open ? 'Свернуть' : 'Подробнее';
+      if (open) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
 
+    hint.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const grid = card.closest('.products-grid');
-      const isExpanded = card.classList.contains('product-card--expanded');
+      const willOpen = !card.classList.contains('product-card--expanded');
 
       grid?.querySelectorAll('.product-card--expanded').forEach((expandedCard) => {
+        if (expandedCard === card) return;
         expandedCard.classList.remove('product-card--expanded');
-        expandedCard.setAttribute('aria-expanded', 'false');
+        const otherHint = expandedCard.querySelector('.product-card__expand-hint');
+        if (otherHint) {
+          otherHint.setAttribute('aria-expanded', 'false');
+          otherHint.textContent = 'Подробнее';
+        }
       });
 
-      if (!isExpanded) {
-        card.classList.add('product-card--expanded');
-        card.setAttribute('aria-expanded', 'true');
-        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    });
-
-    card.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      if (e.target.closest('.add-to-cart, .product-card__add--in-cart')) return;
-      e.preventDefault();
-      card.click();
+      setExpanded(willOpen);
     });
   });
 }
@@ -875,6 +967,9 @@ function initHeroSlider() {
   const currentEl = document.getElementById('heroSliderCurrent');
   const totalEl = document.getElementById('heroSliderTotal');
   const captionEl = document.getElementById('heroSliderCaption');
+  const dotsEl = document.getElementById('heroSliderDots');
+  const prevBtn = document.getElementById('heroSliderPrev');
+  const nextBtn = document.getElementById('heroSliderNext');
   if (!track) return;
 
   const byCat = ['volume', 'treatment', 'homecare', 'finisher']
@@ -901,6 +996,22 @@ function initHeroSlider() {
     )
     .join('');
 
+  if (dotsEl) {
+    dotsEl.innerHTML = slides
+      .map(
+        (p, i) => `
+      <button
+        type="button"
+        class="hero-slider__dot ${i === 0 ? 'hero-slider__dot--active' : ''}"
+        role="tab"
+        aria-selected="${i === 0 ? 'true' : 'false'}"
+        aria-label="Слайд ${padSlideIndex(i + 1)}: ${p.name}"
+        data-index="${i}"
+      ></button>`
+      )
+      .join('');
+  }
+
   let current = 0;
   let timer;
   let paused = false;
@@ -911,6 +1022,11 @@ function initHeroSlider() {
       const active = i === current;
       slide.classList.toggle('hero-slider__slide--active', active);
       slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+    });
+    dotsEl?.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
+      const active = i === current;
+      dot.classList.toggle('hero-slider__dot--active', active);
+      dot.setAttribute('aria-selected', active ? 'true' : 'false');
     });
     if (currentEl) currentEl.textContent = padSlideIndex(current + 1);
     if (captionEl) captionEl.textContent = slides[current].name;
@@ -943,6 +1059,24 @@ function initHeroSlider() {
 
   track.addEventListener('click', () => {
     next();
+    resetTimer();
+  });
+
+  prevBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    prev();
+    resetTimer();
+  });
+  nextBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    next();
+    resetTimer();
+  });
+  dotsEl?.addEventListener('click', (e) => {
+    const dot = e.target.closest('.hero-slider__dot');
+    if (!dot) return;
+    e.stopPropagation();
+    goTo(Number(dot.dataset.index));
     resetTimer();
   });
 
