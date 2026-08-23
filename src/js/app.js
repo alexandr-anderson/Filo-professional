@@ -230,7 +230,7 @@ function initHome() {
       <a href="${line.href}" class="mullion-pane mullion-pane--${line.id}">
         <div class="mullion-pane__glow" aria-hidden="true"></div>
         <div class="mullion-pane__media">
-          <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
+          <img src="${line.image}" alt="Линейка FILO Professional — ${line.title}" loading="lazy" decoding="async">
         </div>
         <div class="mullion-pane__body">
           <span class="mullion-pane__index">0${idx + 1}</span>
@@ -261,7 +261,7 @@ function renderShelfCell(product) {
     <article class="shelf-cell ${inCart ? 'shelf-cell--in-cart' : ''}" data-category="${product.category}" data-id="${product.id}" data-name="${product.name.toLowerCase()}">
       <span class="shelf-cell__cat">${product.categoryLabel}</span>
       <div class="shelf-cell__media">
-        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async">
+        <img src="${product.image}" alt="FILO Professional — ${product.name} (${product.categoryLabel})" loading="lazy" decoding="async">
       </div>
       <div class="shelf-cell__foot">
         <h3 class="shelf-cell__name">${product.name}</h3>
