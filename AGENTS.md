@@ -14,7 +14,11 @@
 
 Каждый скилл — папка с `SKILL.md` и YAML frontmatter (`name`, `description`). Не дублируй те же скилы в `.agents/skills/` без явной просьбы.
 
-Установлен внешний пакет **UI/UX Pro Max** (`ui-ux-pro-max` + companion: `design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) из [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Для FILO сначала держи контракт «Бразильская лаборатория»; Pro Max — для ревизий и поиска паттернов, не для смены палитры без явной просьбы.
+Внешние пакеты (для FILO сначала контракт «Бразильская лаборатория»; не меняй палитру/шрифты без явной просьбы):
+
+- **UI/UX Pro Max** (`ui-ux-pro-max` + companion: `design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) — [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill); ревизии и поиск паттернов.
+- **Skills for Design Engineers** (`emil-design-eng` + motion: `animate`, `review-animations`, `improve-animations`, `find-animation-opportunities`, `apple-design`, …) — [emilkowalski/skills](https://github.com/emilkowalski/skills); polish UI и анимации.
+- **Impeccable** (`impeccable`) — [pbakaus/impeccable](https://github.com/pbakaus/impeccable); audit/polish/анти-slop. Канон в `.cursor/skills/impeccable/`; symlink `.agents/skills/impeccable` → туда же, чтобы работали скрипты пакета (`node .agents/skills/impeccable/scripts/...`).
 
 ## Редизайн и визуал
 
