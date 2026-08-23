@@ -14,6 +14,8 @@
 
 Каждый скилл — папка с `SKILL.md` и YAML frontmatter (`name`, `description`). Не дублируй те же скилы в `.agents/skills/` без явной просьбы.
 
+Установлен внешний пакет **UI/UX Pro Max** (`ui-ux-pro-max` + companion: `design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) из [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Для FILO сначала держи контракт «Бразильская лаборатория»; Pro Max — для ревизий и поиска паттернов, не для смены палитры без явной просьбы.
+
 ## Редизайн и визуал
 
 **Дизайн-система (фаза 2 v2):** «Бразильская лаборатория» — бумага `#ECEDE8`, чернила `#121C29`, blush `#F2D8C6`, акцент-сигнал `#1F5C43`, шрифты **Piazzolla** + **Golos Text**, soft-rect `2px`, без pills/bronze/cream. Тепло — только в фото. Не возвращать Instrument Serif / Inter / deep green+bronze.
