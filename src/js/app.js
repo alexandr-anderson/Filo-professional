@@ -220,12 +220,13 @@ function initHome() {
   if (grid) {
     grid.innerHTML = productLines
       .map(
-        (line) => `
+        (line, i) => `
       <a href="${line.href}" class="line-grid__item">
         <div class="line-grid__media">
           <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
         </div>
         <div class="line-grid__body">
+          <span class="line-grid__index">${String(i + 1).padStart(2, '0')}</span>
           <h3 class="line-grid__title">${line.title}</h3>
           <p class="line-grid__sub">${line.subtitle}</p>
           <span class="line-grid__go">Смотреть →</span>
@@ -241,7 +242,7 @@ function initHome() {
     if (sessionStorage.getItem(key)) {
       heroVisual.classList.add('is-revealed');
     } else {
-      heroVisual.querySelector('img')?.addEventListener(
+      heroVisual.querySelector('.hero-kiln__product')?.addEventListener(
         'animationend',
         () => {
           heroVisual.classList.add('is-revealed');
