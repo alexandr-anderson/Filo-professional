@@ -14,6 +14,8 @@
 
 Каждый скилл — папка с `SKILL.md` и YAML frontmatter (`name`, `description`). Не дублируй те же скилы в `.agents/skills/` без явной просьбы.
 
+Установлен **Taste Skill** (`design-taste-frontend`) из [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — anti-slop для лендингов/редизайна. Для FILO не переписывает палитру/токены «Бразильская лаборатория» без явной просьбы; сначала бриф и существующая дизайн-система.
+
 Установлен внешний пакет **UI/UX Pro Max** (`ui-ux-pro-max` + companion: `design`, `design-system`, `brand`, `ui-styling`, `banner-design`, `slides`) из [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Для FILO сначала держи контракт «Бразильская лаборатория»; Pro Max — для ревизий и поиска паттернов, не для смены палитры без явной просьбы.
 
 ## Редизайн и визуал
