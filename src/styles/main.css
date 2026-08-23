@@ -842,14 +842,15 @@ body.nav-open {
 }
 
 .hero__blush {
+  /* Только за кадром слайдера — не заезжает на caption/controls */
   position: absolute;
-  width: min(100%, 440px);
-  aspect-ratio: 4 / 3.2;
-  background: var(--color-blush);
-  border-radius: var(--radius-lg);
   top: 0;
   left: 50%;
-  transform: translate(calc(-50% + 56px), 28px) rotate(1.5deg);
+  width: min(100%, 400px);
+  aspect-ratio: 4 / 3;
+  background: var(--color-blush);
+  border-radius: var(--radius-lg);
+  transform: translate(calc(-50% + 28px), -10px) rotate(1.5deg);
   z-index: 0;
   pointer-events: none;
 }
@@ -919,6 +920,7 @@ body.nav-open {
   position: relative;
   z-index: 2;
   margin: 1.15rem 0 0;
+  padding: 0.15rem 0;
   text-align: left;
   font-family: var(--font-display);
   font-size: 1.05rem;
@@ -926,13 +928,18 @@ body.nav-open {
   color: var(--color-text-muted-on-dark);
   line-height: 1.3;
   min-height: 1.4em;
+  background: var(--color-bg-dark);
 }
 
 .hero-slider__controls {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 0.85rem;
+  padding: 0.25rem 0 0.15rem;
+  background: var(--color-bg-dark);
 }
 
 .hero-slider__nav {
@@ -944,7 +951,7 @@ body.nav-open {
   border: 1px solid rgba(236, 237, 232, 0.35);
   border-radius: var(--radius-control);
   color: var(--color-text-on-dark);
-  background: transparent;
+  background: var(--color-bg-dark);
   font-size: 1rem;
   line-height: 1;
   transition: border-color var(--transition), background var(--transition);
@@ -3565,8 +3572,9 @@ body.nav-open .cookie-consent {
   }
 
   .hero__blush {
-    width: min(88%, 280px);
-    transform: translate(calc(-50% + 14px), -2px) rotate(1.25deg);
+    width: min(100%, 280px);
+    aspect-ratio: 3 / 4;
+    transform: translate(calc(-50% + 16px), -8px) rotate(1.25deg);
   }
 
   .hero-slider {
@@ -3591,7 +3599,7 @@ body.nav-open .cookie-consent {
   }
 
   .hero-slider__frame {
-    padding: 20px;
+    padding: 0;
   }
 
   .hero__actions {
