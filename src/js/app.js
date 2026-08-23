@@ -236,23 +236,7 @@ function initHome() {
   }
 
   const heroVisual = document.getElementById('heroVisual');
-  if (heroVisual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const key = 'filo_kiln_revealed';
-    if (sessionStorage.getItem(key)) {
-      heroVisual.classList.add('is-revealed');
-    } else {
-      heroVisual.querySelector('img')?.addEventListener(
-        'animationend',
-        () => {
-          heroVisual.classList.add('is-revealed');
-          sessionStorage.setItem(key, '1');
-        },
-        { once: true }
-      );
-    }
-  } else {
-    heroVisual?.classList.add('is-revealed');
-  }
+  heroVisual?.classList.add('is-revealed');
 }
 
 function renderShelfCell(product) {

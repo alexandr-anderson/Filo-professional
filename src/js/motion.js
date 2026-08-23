@@ -1,9 +1,61 @@
-/** Glaze atelier — minimal motion (hero kiln only; shelf uses CSS) */
+/** Glaze atelier motion — hero sheen, parallax, scroll reveal */
 
 export function initMotion() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hero = document.getElementById('heroVisual');
 
-  document.querySelectorAll('.shelf-cell--in-cart').forEach((cell) => {
-    cell.classList.add('shelf-cell--in-cart');
+  if (hero && !reduced) {
+    hero.addEventListener(
+      'mousemove',
+      (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 5;
+        const wrap = hero.querySelector('.hero-kiln__product-wrap');
+        if (wrap) {
+          wrap.style.transform = `translate(${x}px, ${y}px)`;
+        }
+      },
+      { passive: true }
+    );
+
+    hero.addEventListener('mouseleave', () => {
+      const wrap = hero.querySelector('.hero-kiln__product-wrap');
+      if (wrap) wrap.style.transform = '';
+    });
+  }
+
+  if (!reduced) {
+    initScrollReveal();
+  }
+
+  document.querySelectorAll('.shelf-cell[data-id]').forEach((cell) => {
+    cell.style.cursor = 'default';
+    const add = cell.querySelector('.add-to-cart, .shelf-qty__btn');
+    if (add) add.style.cursor = 'pointer';
+  });
+}
+
+function initScrollReveal() {
+  const targets = document.querySelectorAll(
+    '.hero-kiln__cell, .line-grid__item, .assertion__cell'
+  );
+  if (!targets.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+  );
+
+  targets.forEach((el) => {
+    el.classList.add('reveal-up');
+    observer.observe(el);
   });
 }
