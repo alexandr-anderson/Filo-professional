@@ -1,43 +1,58 @@
-/** Glaze atelier — editorial grid motion */
+/** Concept B — Glass & Mullions Motion Experience */
 
 export function initMotion() {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hero = document.getElementById('heroVisual');
+  
+  // 1. Интерактивное мерцание и световой отклик кобальтового стекла
+  const cobaltPane = document.getElementById('cobaltPane');
+  if (cobaltPane && !reduced) {
+    cobaltPane.addEventListener('mousemove', (e) => {
+      const rect = cobaltPane.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const shimmer = cobaltPane.querySelector('.cobalt-shimmer');
+      if (shimmer) {
+        shimmer.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%)`;
+      }
+    }, { passive: true });
 
-  if (hero && !reduced) {
-    hero.addEventListener(
-      'mousemove',
-      (e) => {
-        const rect = hero.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 4;
-        const products = hero.querySelector('.hero-atelier__products');
-        if (products) {
-          products.style.transform = `translate(${x}px, ${y}px)`;
-        }
-      },
-      { passive: true }
-    );
-
-    hero.addEventListener('mouseleave', () => {
-      const products = hero.querySelector('.hero-atelier__products');
-      if (products) products.style.transform = '';
+    cobaltPane.addEventListener('mouseleave', () => {
+      const shimmer = cobaltPane.querySelector('.cobalt-shimmer');
+      if (shimmer) shimmer.style.background = '';
     });
   }
 
+  // 2. Parallax-глубина для силуэта флакона за рифленым стеклом
+  const bottleWrap = document.querySelector('.glass-silhouetted-bottle');
+  const heroWall = document.getElementById('heroWall');
+  if (bottleWrap && heroWall && !reduced) {
+    heroWall.addEventListener('mousemove', (e) => {
+      const rect = heroWall.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+      bottleWrap.style.transform = `scale(1.02) translate(${x}px, ${y}px)`;
+    }, { passive: true });
+
+    heroWall.addEventListener('mouseleave', () => {
+      bottleWrap.style.transform = '';
+    });
+  }
+
+  // 3. Scroll-reveal для стеклянных створок фасада
   if (!reduced) {
     initScrollReveal();
   }
 
-  document.querySelectorAll('.shelf-cell[data-id]').forEach((cell) => {
-    cell.style.cursor = 'default';
-    const add = cell.querySelector('.add-to-cart, .shelf-qty__btn');
-    if (add) add.style.cursor = 'pointer';
+  // 4. Cursor feedback для интерактивных элементов на стекле
+  document.querySelectorAll('.shelf-cell[data-id], .mullion-pane').forEach((cell) => {
+    cell.style.cursor = 'pointer';
   });
 }
 
 function initScrollReveal() {
-  const targets = document.querySelectorAll('.line-grid__item, .assertion__cell');
+  const targets = document.querySelectorAll(
+    '.mullion-pane, .assertion-pane, .shelf-cell, .info-card'
+  );
   if (!targets.length) return;
 
   const observer = new IntersectionObserver(
@@ -49,7 +64,7 @@ function initScrollReveal() {
         }
       });
     },
-    { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+    { threshold: 0.08, rootMargin: '0px 0px -6% 0px' }
   );
 
   targets.forEach((el) => {

@@ -101,6 +101,9 @@ function updateOrderLink() {
   const count = getCartCount();
   const link = document.querySelector('.site-bar__link[href="/order.html"]');
   if (link) link.textContent = `Заказ (${count})`;
+  
+  const topCartBadge = document.getElementById('cartCountBadge');
+  if (topCartBadge) topCartBadge.textContent = String(count);
 }
 
 function initSiteBarScroll() {
@@ -223,27 +226,24 @@ function initHome() {
   if (grid) {
     grid.innerHTML = productLines
       .map(
-        (line) => `
-      <a href="${line.href}" class="line-grid__item">
-        <div class="line-grid__media">
+        (line, idx) => `
+      <a href="${line.href}" class="mullion-pane mullion-pane--${line.id}">
+        <div class="mullion-pane__glow" aria-hidden="true"></div>
+        <div class="mullion-pane__media">
           <img src="${line.image}" alt="${line.title}" loading="lazy" decoding="async">
         </div>
-        <div class="line-grid__body">
-          <h3 class="line-grid__title">${line.title}</h3>
-          <p class="line-grid__sub">${line.subtitle}</p>
-          <span class="line-grid__go">Смотреть →</span>
+        <div class="mullion-pane__body">
+          <span class="mullion-pane__index">0${idx + 1}</span>
+          <h3 class="mullion-pane__title">${line.title}</h3>
+          <p class="mullion-pane__sub">${line.subtitle}</p>
+          <span class="mullion-pane__link">Смотреть в каталоге →</span>
         </div>
       </a>`
       )
       .join('');
   }
 
-  document.querySelectorAll('.hero-atelier__product').forEach((el) => {
-    el.classList.add('is-visible');
-  });
-
-  const heroVisual = document.getElementById('heroVisual');
-  heroVisual?.classList.add('is-ready');
+  updateOrderLink();
 }
 
 function renderShelfCell(product) {
