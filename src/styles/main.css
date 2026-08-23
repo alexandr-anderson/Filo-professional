@@ -1347,11 +1347,12 @@ body.cookie-visible {
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(14, 14, 14, 0.24);
   font-family: var(--font-mono);
-  font-size: 0.64rem;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 600;
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: var(--charcoal-faint);
+  color: var(--charcoal-ink);
+  opacity: 0.85;
 }
 
 .registry-list {
@@ -1517,11 +1518,12 @@ body.cookie-visible {
 .shelf-cell__cat {
   padding: 12px clamp(14px, 1.4vw, 18px) 0;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--charcoal-faint);
+  color: var(--charcoal-ink);
+  opacity: 0.85;
 }
 
 .shelf-cell__media {
@@ -1565,10 +1567,12 @@ body.cookie-visible {
 
 .shelf-cell__meta {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--charcoal-faint);
+  color: var(--charcoal-ink);
+  opacity: 0.82;
 }
 
 .shelf-cell__price {
