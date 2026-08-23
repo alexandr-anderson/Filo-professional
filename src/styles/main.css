@@ -39,7 +39,7 @@
   --charcoal-muted: #4a4a4a;
   --charcoal-faint: rgba(17, 17, 17, 0.55);
   --ink-on-dark: rgba(243, 241, 236, 0.94);
-  --ink-on-dark-muted: rgba(243, 241, 236, 0.6);
+  --ink-on-dark-muted: rgba(243, 241, 236, 0.66);
   --ink-on-cobalt-muted: rgba(255, 255, 255, 0.72);
 
   /* Типографика */
@@ -113,6 +113,7 @@
 }
 
 html {
+  scrollbar-color: #2b2b2b var(--matte-black);
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + 24px);
@@ -292,12 +293,10 @@ body.cookie-visible {
    04 · МАТЕРИАЛ СТЕКЛА (общие примеси)
    -------------------------------------------------------------------------- */
 .glass-pane,
-.mullion-pane,
 .assertion-pane,
 .shelf-cell,
 .order-main,
-.order-aside,
-.pane-sheet {
+.order-aside {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -307,7 +306,7 @@ body.cookie-visible {
 .glass-pane::before,
 .assertion-pane::before,
 .shelf-cell::before,
-.pane-sheet::before {
+.order-main::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -318,8 +317,7 @@ body.cookie-visible {
 }
 
 .glass-pane::after,
-.assertion-pane::after,
-.pane-sheet::after {
+.assertion-pane::after {
   content: '';
   position: absolute;
   inset: -30%;
@@ -437,7 +435,7 @@ body.cookie-visible {
 
 .glass-meta {
   font-family: var(--font-mono);
-  font-size: clamp(0.56rem, 0.5rem + 0.16vw, 0.68rem);
+  font-size: clamp(0.62rem, 0.56rem + 0.16vw, 0.72rem);
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0.16em;
@@ -460,7 +458,7 @@ body.cookie-visible {
 
 .glass-nav__link {
   font-family: var(--font-mono);
-  font-size: clamp(0.56rem, 0.5rem + 0.15vw, 0.67rem);
+  font-size: clamp(0.64rem, 0.58rem + 0.15vw, 0.74rem);
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -499,7 +497,7 @@ body.cookie-visible {
   background: var(--matte-black);
   color: var(--seeded-white);
   font-family: var(--font-mono);
-  font-size: clamp(0.56rem, 0.5rem + 0.14vw, 0.66rem);
+  font-size: clamp(0.64rem, 0.58rem + 0.14vw, 0.72rem);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -662,15 +660,15 @@ body.cookie-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 43% 55%;
+  object-position: 44% 56%;
   filter: grayscale(0.22) brightness(1.05) contrast(1.03);
-  transform: scale(1.68);
+  transform: scale(1.95);
   transition: transform var(--dur-slow) var(--ease-glass),
     filter var(--dur-slow) var(--ease-glass);
 }
 
 .glass-pane--product-silhouette:hover .glass-silhouetted-bottle img {
-  transform: scale(1.74);
+  transform: scale(2.01);
   filter: grayscale(0.06) brightness(1.09) contrast(1.05);
 }
 
@@ -698,7 +696,7 @@ body.cookie-visible {
 /* --- Нижний ряд: подоконник -------------------------------------------- */
 .glass-footnote {
   font-family: var(--font-mono);
-  font-size: clamp(0.54rem, 0.5rem + 0.14vw, 0.65rem);
+  font-size: clamp(0.6rem, 0.54rem + 0.14vw, 0.7rem);
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: 0.16em;
@@ -1065,7 +1063,7 @@ body.cookie-visible {
   font-weight: 500;
   letter-spacing: var(--track-mono);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--pane-accent, var(--cobalt-pane)) 84%, #000 16%);
+  color: color-mix(in srgb, var(--pane-accent, var(--cobalt-pane)) 62%, #000 38%);
   transition: transform var(--dur) var(--ease-glass);
 }
 
@@ -1205,7 +1203,7 @@ body.cookie-visible {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.4;
-  color: rgba(243, 241, 236, 0.5);
+  color: rgba(243, 241, 236, 0.58);
 }
 
 .site-bar__nav {
@@ -1506,7 +1504,7 @@ body.cookie-visible {
 .shelf-cell__cat {
   padding: 12px clamp(14px, 1.4vw, 18px) 0;
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1628,12 +1626,13 @@ body.cookie-visible {
   justify-content: center;
   gap: 12px;
   padding: clamp(22px, 2.4vw, 34px);
-  background: linear-gradient(160deg, rgba(111, 143, 132, 0.24) 0%, rgba(243, 241, 236, 0.9) 70%);
+  background: linear-gradient(168deg, rgba(111, 143, 132, 0.5) 0%, rgba(202, 214, 206, 0.9) 42%, rgba(243, 241, 236, 0.96) 100%);
 }
 
 .shelf-cell--statement:hover {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  background: linear-gradient(160deg, rgba(111, 143, 132, 0.3) 0%, rgba(243, 241, 236, 0.95) 70%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 30px rgba(111, 143, 132, 0.28);
+  background: linear-gradient(168deg, rgba(111, 143, 132, 0.58) 0%, rgba(206, 218, 210, 0.94) 42%, rgba(248, 246, 242, 0.98) 100%);
 }
 
 .shelf-cell--statement-cobalt {
@@ -1673,7 +1672,7 @@ body.cookie-visible {
   padding: var(--mullion-w);
   background: var(--mullion-color);
   border: var(--frame-w) solid var(--matte-black);
-  align-items: start;
+  align-items: stretch;
 }
 
 .order-main {
@@ -1810,11 +1809,31 @@ body.cookie-visible {
   color: #fff;
   box-shadow: var(--cobalt-glow);
   position: sticky;
+  align-self: start;
   top: calc(var(--header-h) + var(--mullion-w) * 3);
 }
 
 .order-aside[hidden] {
   display: none;
+}
+
+/* Пустой заказ: кобальтовая створка скрыта — стекло занимает всю раму */
+.order-layout:has(.order-aside[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Инвертированная CTA на кобальтовом стекле */
+.order-aside .btn--oxide {
+  background: #fff;
+  border-color: #fff;
+  color: var(--cobalt-deep);
+}
+
+.order-aside .btn--oxide:hover {
+  background: var(--matte-black);
+  border-color: var(--matte-black);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(0, 0, 0, 0.4);
 }
 
 .order-aside::before {
@@ -1943,7 +1962,7 @@ body.cookie-visible {
   box-shadow: 0 0 0 3px rgba(196, 122, 44, 0.28);
 }
 
-.form-checkbox {
+.form-group .form-checkbox {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1955,7 +1974,7 @@ body.cookie-visible {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.form-checkbox input {
+.form-group .form-checkbox input {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
@@ -1963,7 +1982,7 @@ body.cookie-visible {
   cursor: pointer;
 }
 
-.form-checkbox span {
+.form-group .form-checkbox span {
   line-height: 1.4;
 }
 
@@ -2012,13 +2031,10 @@ body.cookie-visible {
 }
 
 /* Формы на светлом стекле (подстраницы) */
-.pane-sheet .form-group label,
-.content-block .form-group label {
-  color: var(--charcoal-faint);
-}
-
-.pane-sheet .form-hint,
-.content-block .form-hint {
+.content-block .form-group label,
+.content-block .form-hint,
+.order-main .form-group label,
+.order-main .form-hint {
   color: var(--charcoal-faint);
 }
 
@@ -2243,7 +2259,7 @@ body.cookie-visible {
   font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.12em;
-  color: rgba(243, 241, 236, 0.42);
+  color: rgba(243, 241, 236, 0.5);
   padding-top: 3px;
 }
 
@@ -2252,7 +2268,7 @@ body.cookie-visible {
   font-size: 0.6rem;
   letter-spacing: var(--track-mono);
   text-transform: uppercase;
-  color: rgba(243, 241, 236, 0.48);
+  color: rgba(243, 241, 236, 0.56);
   margin-bottom: 4px;
 }
 
@@ -2335,7 +2351,7 @@ body.cookie-visible {
   font-weight: 500;
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
-  color: rgba(243, 241, 236, 0.44);
+  color: rgba(243, 241, 236, 0.52);
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(243, 241, 236, 0.16);
   width: 100%;
@@ -2369,7 +2385,7 @@ body.cookie-visible {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.06em;
-  color: rgba(243, 241, 236, 0.42);
+  color: rgba(243, 241, 236, 0.54);
 }
 
 .glass-footer__bottom a:hover,
@@ -2547,7 +2563,7 @@ dialog > footer,
 @media (max-width: 900px) {
   .glass-wall {
     grid-template-columns: 1fr 0.95fr;
-    grid-template-rows: var(--header-h) auto minmax(300px, 0.95fr) minmax(260px, 0.75fr) var(--sill-h);
+    grid-template-rows: var(--header-h) auto auto minmax(300px, 1fr) var(--sill-h);
   }
 
   .glass-pane--top-nav {
@@ -2697,7 +2713,7 @@ dialog > footer,
   }
 
   .glass-nav__link {
-    font-size: 0.54rem;
+    font-size: 0.62rem;
     letter-spacing: 0.1em;
   }
 
@@ -2731,7 +2747,7 @@ dialog > footer,
   }
 
   .glass-pane--product-silhouette {
-    min-height: 360px;
+    min-height: 430px;
   }
 
   .glass-pane--bottom-left,
