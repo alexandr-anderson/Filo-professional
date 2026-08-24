@@ -448,6 +448,24 @@ function initOrder() {
   renderOrderForm();
 }
 
+function renderOrderTotal(cart) {
+  const { hasPriced, hasUnpriced } = getCartPricing(cart);
+  const hint = !hasPriced
+    ? PRICE_HINT
+    : hasUnpriced
+      ? 'Позиции без цены в каталоге уточним в Telegram'
+      : '';
+
+  return `
+    <div class="order-total">
+      <div>
+        <p class="order-total__label">Итого</p>
+        ${hint ? `<p class="order-total__hint">${hint}</p>` : ''}
+      </div>
+      <p class="order-total__value">${formatCartTotal(cart)}</p>
+    </div>`;
+}
+
 function renderOrderBody() {
   const body = document.getElementById('orderBody');
   const header = document.getElementById('orderHeader');
@@ -507,7 +525,8 @@ function renderOrderBody() {
           })
           .join('')}
       </tbody>
-    </table>`;
+    </table>
+    ${renderOrderTotal(cart)}`;
 
   body.querySelectorAll('[data-action]').forEach((btn) => {
     btn.addEventListener('click', () => {
