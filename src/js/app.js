@@ -29,6 +29,7 @@ import {
   updateQty,
   clearCart,
 } from './cart.js';
+import { sanitizePhoneInput, normalizePhoneToPlus7, isValidRuPhone } from './phone.js';
 
 const currentPage = document.body.dataset.page || 'home';
 const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
@@ -636,7 +637,19 @@ function renderOrderForm() {
       </div>
       <div class="form-group">
         <label for="customerPhone">Телефон</label>
-        <input type="tel" id="customerPhone" name="phone" required autocomplete="tel">
+        <input
+          type="tel"
+          id="customerPhone"
+          name="phone"
+          required
+          autocomplete="tel"
+          inputmode="tel"
+          maxlength="18"
+          placeholder="+7 (___) ___-__-__"
+          aria-describedby="phoneHint phoneError"
+        >
+        <p class="form-hint" id="phoneHint">Скобки и пробелы можно — в Telegram уйдёт как +7 и 10 цифр</p>
+        <p class="form-error" id="phoneError" hidden>Укажите российский номер: 11 цифр, начинается с +7</p>
       </div>
       <div class="form-group">
         <label class="form-checkbox">
@@ -671,23 +684,59 @@ function renderOrderForm() {
     updateOrderPreview();
   });
 
-  ['customerName', 'customerPhone', 'deliveryMethod', 'customerAddress'].forEach(
-    (id) => {
-      document.getElementById(id)?.addEventListener('input', updateOrderPreview);
-      document.getElementById(id)?.addEventListener('change', updateOrderPreview);
-    }
-  );
+  ['customerName', 'deliveryMethod', 'customerAddress'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', updateOrderPreview);
+    document.getElementById(id)?.addEventListener('change', updateOrderPreview);
+  });
+
+  bindPhoneField();
 
   document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
   updateOrderPreview();
 }
 
+function bindPhoneField() {
+  const input = document.getElementById('customerPhone');
+  if (!input || input.dataset.bound) return;
+  input.dataset.bound = '1';
+
+  input.addEventListener('input', () => {
+    const cleaned = sanitizePhoneInput(input.value);
+    if (cleaned !== input.value) input.value = cleaned;
+    if (isValidRuPhone(input.value)) {
+      setPhoneError(false);
+    }
+    updateOrderPreview();
+  });
+
+  input.addEventListener('blur', () => {
+    const normalized = normalizePhoneToPlus7(input.value);
+    if (normalized) input.value = normalized;
+    if (input.value.trim()) setPhoneError(!isValidRuPhone(input.value));
+    updateOrderPreview();
+  });
+}
+
+function setPhoneError(invalid) {
+  const input = document.getElementById('customerPhone');
+  const error = document.getElementById('phoneError');
+  if (input) {
+    if (invalid) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  }
+  if (error) error.hidden = !invalid;
+}
+
 function getFormData() {
   const form = document.getElementById('orderForm');
   if (!form) return null;
+  const phoneRaw = form.phone.value.trim();
+  const phoneNormalized = normalizePhoneToPlus7(phoneRaw);
   return {
     name: form.name.value.trim(),
-    phone: form.phone.value.trim(),
+    phoneRaw,
+    phone: phoneNormalized || phoneRaw,
+    phoneValid: isValidRuPhone(phoneRaw),
     needsDelivery: form.needsDelivery.checked,
     delivery: form.delivery.value,
     address: form.address.value.trim(),
@@ -700,17 +749,13 @@ function updateOrderPreview() {
   if (!preview || cart.length === 0) return;
 
   const fd = getFormData();
-  if (!fd || !fd.name) {
-    preview.textContent = buildOrderMessage({
-      name: '…',
-      phone: '…',
-      needsDelivery: fd?.needsDelivery || false,
-      delivery: fd?.delivery || '',
-      address: fd?.address || '',
-    });
-    return;
-  }
-  preview.textContent = buildOrderMessage(fd);
+  preview.textContent = buildOrderMessage({
+    name: fd?.name || '…',
+    phone: fd?.phoneValid ? fd.phone : fd?.phoneRaw || '…',
+    needsDelivery: fd?.needsDelivery || false,
+    delivery: fd?.delivery || '',
+    address: fd?.address || '',
+  });
 }
 
 async function handleOrderSubmit(e) {
@@ -728,18 +773,25 @@ async function handleOrderSubmit(e) {
   const formData = getFormData();
   const errors = [];
   if (!formData.name) errors.push('name');
-  if (!formData.phone) errors.push('phone');
+  if (!formData.phoneValid) errors.push('phone');
 
   if (errors.length) {
     messageEl.className = 'form-message';
-    messageEl.textContent = 'Заполните обязательные поля';
+    messageEl.textContent = errors.includes('phone') && formData.phoneRaw
+      ? 'Проверьте номер телефона'
+      : 'Заполните обязательные поля';
     errors.forEach((f) => form.elements.namedItem(f)?.setAttribute('aria-invalid', 'true'));
+    if (errors.includes('phone')) setPhoneError(true);
     return;
   }
 
   form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+  setPhoneError(false);
 
-  const orderMessage = buildOrderMessage(formData);
+  const orderMessage = buildOrderMessage({
+    ...formData,
+    phone: formData.phone,
+  });
   submitBtn.disabled = true;
 
   if (TELEGRAM_USERNAME) {

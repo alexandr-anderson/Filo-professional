@@ -2020,6 +2020,17 @@ body.cookie-visible {
   box-shadow: 0 0 0 3px rgba(196, 122, 44, 0.28);
 }
 
+.form-error {
+  margin-top: 7px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: #ffd7a1;
+}
+
+.form-error[hidden] {
+  display: none;
+}
+
 .form-group .form-checkbox {
   display: flex;
   align-items: center;
