@@ -2565,6 +2565,21 @@ dialog > .dialog__body,
   padding: clamp(18px, 2.4vw, 32px);
 }
 
+.remove-dialog__name {
+  margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--charcoal-ink);
+}
+
+#removeDialogQuestion {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--charcoal-ink);
+}
+
 dialog > footer,
 .dialog__foot {
   display: flex;

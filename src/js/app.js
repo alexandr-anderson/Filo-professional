@@ -444,6 +444,7 @@ function buildOrderMessage(formData) {
 }
 
 function initOrder() {
+  injectRemoveDialog();
   renderOrderBody();
   renderOrderForm();
 }
@@ -464,6 +465,64 @@ function renderOrderTotal(cart) {
       </div>
       <p class="order-total__value">${formatCartTotal(cart)}</p>
     </div>`;
+}
+
+function injectRemoveDialog() {
+  if (document.getElementById('removeDialog')) return;
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `<dialog class="remove-dialog" id="removeDialog" aria-labelledby="removeDialogQuestion">
+      <header class="dialog__head">Удаление из заказа</header>
+      <div class="dialog__body">
+        <p id="removeDialogQuestion">Вы уверены, что хотите совсем убрать данный товар из корзины?</p>
+        <p class="remove-dialog__name" id="removeDialogName"></p>
+      </div>
+      <footer class="dialog__foot">
+        <button type="button" class="btn btn--ghost" id="removeDialogCancel">Отменить</button>
+        <button type="button" class="btn btn--oxide" id="removeDialogConfirm">Убрать</button>
+      </footer>
+    </dialog>`
+  );
+}
+
+function confirmRemoveItem(productId) {
+  const dialog = document.getElementById('removeDialog');
+  const nameEl = document.getElementById('removeDialogName');
+  const cancelBtn = document.getElementById('removeDialogCancel');
+  const confirmBtn = document.getElementById('removeDialogConfirm');
+  if (!dialog || !cancelBtn || !confirmBtn) return Promise.resolve(false);
+
+  const product = products.find((p) => p.id === productId);
+  if (nameEl) nameEl.textContent = product?.name || '';
+
+  return new Promise((resolve) => {
+    let settled = false;
+
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      cancelBtn.removeEventListener('click', onCancel);
+      confirmBtn.removeEventListener('click', onConfirm);
+      dialog.removeEventListener('cancel', onCancel);
+      dialog.removeEventListener('click', onBackdrop);
+      if (dialog.open) dialog.close();
+      resolve(ok);
+    };
+
+    const onCancel = () => finish(false);
+    const onConfirm = () => finish(true);
+    const onBackdrop = (e) => {
+      if (e.target === dialog) finish(false);
+    };
+
+    cancelBtn.addEventListener('click', onCancel);
+    confirmBtn.addEventListener('click', onConfirm);
+    dialog.addEventListener('cancel', onCancel);
+    dialog.addEventListener('click', onBackdrop);
+    dialog.showModal();
+    cancelBtn.focus();
+  });
 }
 
 function renderOrderBody() {
@@ -529,15 +588,30 @@ function renderOrderBody() {
     ${renderOrderTotal(cart)}`;
 
   body.querySelectorAll('[data-action]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const row = btn.closest('[data-id]');
       const id = row?.dataset.id;
       if (!id) return;
       const item = cart.find((c) => c.id === id);
       const action = btn.dataset.action;
-      if (action === 'increase') updateQty(id, (item?.qty || 0) + 1);
-      if (action === 'decrease') updateQty(id, (item?.qty || 0) - 1);
-      if (action === 'remove') removeFromCart(id);
+
+      if (action === 'increase') {
+        updateQty(id, (item?.qty || 0) + 1);
+      } else if (action === 'decrease') {
+        const nextQty = (item?.qty || 0) - 1;
+        if (nextQty <= 0) {
+          const confirmed = await confirmRemoveItem(id);
+          if (!confirmed) return;
+          removeFromCart(id);
+        } else {
+          updateQty(id, nextQty);
+        }
+      } else if (action === 'remove') {
+        const confirmed = await confirmRemoveItem(id);
+        if (!confirmed) return;
+        removeFromCart(id);
+      }
+
       updateOrderLink();
       renderOrderBody();
       updateOrderPreview();
