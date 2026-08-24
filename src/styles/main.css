@@ -1797,6 +1797,45 @@ body.cookie-visible {
   border-color: var(--oxblood-pane);
 }
 
+.order-total {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(12px, 1.4vw, 20px) 24px;
+  border-top: 2px solid var(--matte-black);
+}
+
+.order-total__label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--charcoal-faint);
+}
+
+.order-total__hint {
+  margin: 6px 0 0;
+  max-width: 42ch;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--charcoal-muted);
+}
+
+.order-total__value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: var(--track-tight);
+  color: var(--charcoal-ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .order-empty {
   padding: clamp(32px, 5vw, 72px) clamp(20px, 3vw, 48px);
   color: var(--charcoal-muted);
@@ -1979,6 +2018,17 @@ body.cookie-visible {
 .form-group textarea[aria-invalid='true'] {
   border-color: var(--amber-pane);
   box-shadow: 0 0 0 3px rgba(196, 122, 44, 0.28);
+}
+
+.form-error {
+  margin-top: 7px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: #ffd7a1;
+}
+
+.form-error[hidden] {
+  display: none;
 }
 
 .form-group .form-checkbox {
@@ -2526,6 +2576,21 @@ dialog > .dialog__body,
   padding: clamp(18px, 2.4vw, 32px);
 }
 
+.remove-dialog__name {
+  margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--charcoal-ink);
+}
+
+#removeDialogQuestion {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--charcoal-ink);
+}
+
 dialog > footer,
 .dialog__foot {
   display: flex;
@@ -2863,6 +2928,18 @@ dialog > footer,
     top: 12px;
     right: 12px;
     width: auto;
+  }
+
+  .order-total {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .order-total__value {
+    text-align: left;
+    white-space: normal;
   }
 
   .glass-footer__inner,

@@ -29,6 +29,7 @@ import {
   updateQty,
   clearCart,
 } from './cart.js';
+import { sanitizePhoneInput, normalizePhoneToPlus7, isValidRuPhone } from './phone.js';
 
 const currentPage = document.body.dataset.page || 'home';
 const COOKIE_CONSENT_KEY = 'filo_cookie_consent';
@@ -444,8 +445,85 @@ function buildOrderMessage(formData) {
 }
 
 function initOrder() {
+  injectRemoveDialog();
   renderOrderBody();
   renderOrderForm();
+}
+
+function renderOrderTotal(cart) {
+  const { hasPriced, hasUnpriced } = getCartPricing(cart);
+  const hint = !hasPriced
+    ? PRICE_HINT
+    : hasUnpriced
+      ? 'Позиции без цены в каталоге уточним в Telegram'
+      : '';
+
+  return `
+    <div class="order-total">
+      <div>
+        <p class="order-total__label">Итого</p>
+        ${hint ? `<p class="order-total__hint">${hint}</p>` : ''}
+      </div>
+      <p class="order-total__value">${formatCartTotal(cart)}</p>
+    </div>`;
+}
+
+function injectRemoveDialog() {
+  if (document.getElementById('removeDialog')) return;
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `<dialog class="remove-dialog" id="removeDialog" aria-labelledby="removeDialogQuestion">
+      <header class="dialog__head">Удаление из заказа</header>
+      <div class="dialog__body">
+        <p id="removeDialogQuestion">Вы уверены, что хотите совсем убрать данный товар из корзины?</p>
+        <p class="remove-dialog__name" id="removeDialogName"></p>
+      </div>
+      <footer class="dialog__foot">
+        <button type="button" class="btn btn--ghost" id="removeDialogCancel">Отменить</button>
+        <button type="button" class="btn btn--oxide" id="removeDialogConfirm">Убрать</button>
+      </footer>
+    </dialog>`
+  );
+}
+
+function confirmRemoveItem(productId) {
+  const dialog = document.getElementById('removeDialog');
+  const nameEl = document.getElementById('removeDialogName');
+  const cancelBtn = document.getElementById('removeDialogCancel');
+  const confirmBtn = document.getElementById('removeDialogConfirm');
+  if (!dialog || !cancelBtn || !confirmBtn) return Promise.resolve(false);
+
+  const product = products.find((p) => p.id === productId);
+  if (nameEl) nameEl.textContent = product?.name || '';
+
+  return new Promise((resolve) => {
+    let settled = false;
+
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      cancelBtn.removeEventListener('click', onCancel);
+      confirmBtn.removeEventListener('click', onConfirm);
+      dialog.removeEventListener('cancel', onCancel);
+      dialog.removeEventListener('click', onBackdrop);
+      if (dialog.open) dialog.close();
+      resolve(ok);
+    };
+
+    const onCancel = () => finish(false);
+    const onConfirm = () => finish(true);
+    const onBackdrop = (e) => {
+      if (e.target === dialog) finish(false);
+    };
+
+    cancelBtn.addEventListener('click', onCancel);
+    confirmBtn.addEventListener('click', onConfirm);
+    dialog.addEventListener('cancel', onCancel);
+    dialog.addEventListener('click', onBackdrop);
+    dialog.showModal();
+    cancelBtn.focus();
+  });
 }
 
 function renderOrderBody() {
@@ -507,18 +585,34 @@ function renderOrderBody() {
           })
           .join('')}
       </tbody>
-    </table>`;
+    </table>
+    ${renderOrderTotal(cart)}`;
 
   body.querySelectorAll('[data-action]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const row = btn.closest('[data-id]');
       const id = row?.dataset.id;
       if (!id) return;
       const item = cart.find((c) => c.id === id);
       const action = btn.dataset.action;
-      if (action === 'increase') updateQty(id, (item?.qty || 0) + 1);
-      if (action === 'decrease') updateQty(id, (item?.qty || 0) - 1);
-      if (action === 'remove') removeFromCart(id);
+
+      if (action === 'increase') {
+        updateQty(id, (item?.qty || 0) + 1);
+      } else if (action === 'decrease') {
+        const nextQty = (item?.qty || 0) - 1;
+        if (nextQty <= 0) {
+          const confirmed = await confirmRemoveItem(id);
+          if (!confirmed) return;
+          removeFromCart(id);
+        } else {
+          updateQty(id, nextQty);
+        }
+      } else if (action === 'remove') {
+        const confirmed = await confirmRemoveItem(id);
+        if (!confirmed) return;
+        removeFromCart(id);
+      }
+
       updateOrderLink();
       renderOrderBody();
       updateOrderPreview();
@@ -543,7 +637,19 @@ function renderOrderForm() {
       </div>
       <div class="form-group">
         <label for="customerPhone">Телефон</label>
-        <input type="tel" id="customerPhone" name="phone" required autocomplete="tel">
+        <input
+          type="tel"
+          id="customerPhone"
+          name="phone"
+          required
+          autocomplete="tel"
+          inputmode="tel"
+          maxlength="18"
+          placeholder="+7 (___) ___-__-__"
+          aria-describedby="phoneHint phoneError"
+        >
+        <p class="form-hint" id="phoneHint">Скобки и пробелы можно — в Telegram уйдёт как +7 и 10 цифр</p>
+        <p class="form-error" id="phoneError" hidden>Укажите российский номер: 11 цифр, начинается с +7</p>
       </div>
       <div class="form-group">
         <label class="form-checkbox">
@@ -578,23 +684,59 @@ function renderOrderForm() {
     updateOrderPreview();
   });
 
-  ['customerName', 'customerPhone', 'deliveryMethod', 'customerAddress'].forEach(
-    (id) => {
-      document.getElementById(id)?.addEventListener('input', updateOrderPreview);
-      document.getElementById(id)?.addEventListener('change', updateOrderPreview);
-    }
-  );
+  ['customerName', 'deliveryMethod', 'customerAddress'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', updateOrderPreview);
+    document.getElementById(id)?.addEventListener('change', updateOrderPreview);
+  });
+
+  bindPhoneField();
 
   document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
   updateOrderPreview();
 }
 
+function bindPhoneField() {
+  const input = document.getElementById('customerPhone');
+  if (!input || input.dataset.bound) return;
+  input.dataset.bound = '1';
+
+  input.addEventListener('input', () => {
+    const cleaned = sanitizePhoneInput(input.value);
+    if (cleaned !== input.value) input.value = cleaned;
+    if (isValidRuPhone(input.value)) {
+      setPhoneError(false);
+    }
+    updateOrderPreview();
+  });
+
+  input.addEventListener('blur', () => {
+    const normalized = normalizePhoneToPlus7(input.value);
+    if (normalized) input.value = normalized;
+    if (input.value.trim()) setPhoneError(!isValidRuPhone(input.value));
+    updateOrderPreview();
+  });
+}
+
+function setPhoneError(invalid) {
+  const input = document.getElementById('customerPhone');
+  const error = document.getElementById('phoneError');
+  if (input) {
+    if (invalid) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  }
+  if (error) error.hidden = !invalid;
+}
+
 function getFormData() {
   const form = document.getElementById('orderForm');
   if (!form) return null;
+  const phoneRaw = form.phone.value.trim();
+  const phoneNormalized = normalizePhoneToPlus7(phoneRaw);
   return {
     name: form.name.value.trim(),
-    phone: form.phone.value.trim(),
+    phoneRaw,
+    phone: phoneNormalized || phoneRaw,
+    phoneValid: isValidRuPhone(phoneRaw),
     needsDelivery: form.needsDelivery.checked,
     delivery: form.delivery.value,
     address: form.address.value.trim(),
@@ -607,17 +749,13 @@ function updateOrderPreview() {
   if (!preview || cart.length === 0) return;
 
   const fd = getFormData();
-  if (!fd || !fd.name) {
-    preview.textContent = buildOrderMessage({
-      name: '…',
-      phone: '…',
-      needsDelivery: fd?.needsDelivery || false,
-      delivery: fd?.delivery || '',
-      address: fd?.address || '',
-    });
-    return;
-  }
-  preview.textContent = buildOrderMessage(fd);
+  preview.textContent = buildOrderMessage({
+    name: fd?.name || '…',
+    phone: fd?.phoneValid ? fd.phone : fd?.phoneRaw || '…',
+    needsDelivery: fd?.needsDelivery || false,
+    delivery: fd?.delivery || '',
+    address: fd?.address || '',
+  });
 }
 
 async function handleOrderSubmit(e) {
@@ -635,18 +773,25 @@ async function handleOrderSubmit(e) {
   const formData = getFormData();
   const errors = [];
   if (!formData.name) errors.push('name');
-  if (!formData.phone) errors.push('phone');
+  if (!formData.phoneValid) errors.push('phone');
 
   if (errors.length) {
     messageEl.className = 'form-message';
-    messageEl.textContent = 'Заполните обязательные поля';
+    messageEl.textContent = errors.includes('phone') && formData.phoneRaw
+      ? 'Проверьте номер телефона'
+      : 'Заполните обязательные поля';
     errors.forEach((f) => form.elements.namedItem(f)?.setAttribute('aria-invalid', 'true'));
+    if (errors.includes('phone')) setPhoneError(true);
     return;
   }
 
   form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+  setPhoneError(false);
 
-  const orderMessage = buildOrderMessage(formData);
+  const orderMessage = buildOrderMessage({
+    ...formData,
+    phone: formData.phone,
+  });
   submitBtn.disabled = true;
 
   if (TELEGRAM_USERNAME) {
