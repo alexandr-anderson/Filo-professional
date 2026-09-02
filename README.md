@@ -88,6 +88,25 @@ rsync -av --delete public/images/ /home/c/cm149295/filo/public_html/images/
 > Важно: `src` копируется **без слэша** — так создаётся папка `public_html/src/`.  
 > `public/images/` копируется в `public_html/images/` — не `public/` в корень (иначе `--delete` сотрёт HTML и `src/`).
 
+### Ошибка `HTTP 401` или `could not read Username` при `git pull`
+
+На некоторых хостингах git всё равно требует логин (старый `~/.git-credentials` или system credential helper).
+
+**Быстрый деплой без git** — один раз обновить файлы из архива GitHub:
+
+```bash
+TMP=$(mktemp -d)
+curl -fsSL "https://codeload.github.com/alexandr-anderson/Filo-professional/tar.gz/refs/heads/main" \
+  | tar -xz -C "$TMP" --strip-components=1
+rsync -a --exclude '.git' "$TMP/" /home/c/cm149295/filo-src/
+rm -rf "$TMP"
+bash /home/c/cm149295/filo-src/deploy.sh
+```
+
+Актуальный `deploy.sh` сам пробует `git pull`, а при ошибке — скачивает архив (без логина).
+
+Если хотите починить git навсегда — удалите строку `github.com` из `~/.git-credentials` или настройте SSH deploy key.
+
 ## Структура
 
 ```
