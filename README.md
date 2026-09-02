@@ -88,26 +88,24 @@ rsync -av --delete public/images/ /home/c/cm149295/filo/public_html/images/
 > Важно: `src` копируется **без слэша** — так создаётся папка `public_html/src/`.  
 > `public/images/` копируется в `public_html/images/` — не `public/` в корень (иначе `--delete` сотрёт HTML и `src/`).
 
-### Ошибка `HTTP 401` при `git pull`
+### Ошибка `HTTP 401` или `could not read Username` при `git pull`
 
-Репозиторий **публичный** — для деплоя логин и пароль GitHub **не нужны**. Ошибка 401 почти всегда из‑за старых сохранённых credentials на сервере (GitHub больше не принимает пароль по HTTPS).
+На некоторых хостингах git всё равно требует логин (старый `~/.git-credentials` или system credential helper).
 
-Один раз на сервере:
-
-```bash
-cd /home/c/cm149295/filo-src
-git remote set-url origin https://github.com/alexandr-anderson/Filo-professional.git
-git config --global --unset credential.helper 2>/dev/null || true
-GIT_TERMINAL_PROMPT=0 git -c credential.helper= pull origin main
-```
-
-После этого снова:
+**Быстрый деплой без git** — один раз обновить файлы из архива GitHub:
 
 ```bash
+TMP=$(mktemp -d)
+curl -fsSL "https://codeload.github.com/alexandr-anderson/Filo-professional/tar.gz/refs/heads/main" \
+  | tar -xz -C "$TMP" --strip-components=1
+rsync -a --exclude '.git' "$TMP/" /home/c/cm149295/filo-src/
+rm -rf "$TMP"
 bash /home/c/cm149295/filo-src/deploy.sh
 ```
 
-Если репозиторий станет приватным — настройте [Deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) (SSH) или Personal Access Token.
+Актуальный `deploy.sh` сам пробует `git pull`, а при ошибке — скачивает архив (без логина).
+
+Если хотите починить git навсегда — удалите строку `github.com` из `~/.git-credentials` или настройте SSH deploy key.
 
 ## Структура
 
