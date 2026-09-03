@@ -69,6 +69,23 @@ fi
 
 cd "$SOURCE_DIR"
 
+require_path() {
+  if [[ ! -e "$1" ]]; then
+    echo "ОШИБКА: не найден $1 — деплой отменён, public_html не трогаем."
+    exit 1
+  fi
+}
+
+echo "→ Проверка исходников перед деплоем…"
+require_path index.html
+require_path catalog.html
+require_path order.html
+require_path src/main.js
+require_path src/js/app.js
+require_path src/styles/main.css
+require_path public/favicon.svg
+require_path public/images/products/cafe-verde.webp
+
 rsync -av --delete \
   index.html catalog.html order.html about.html delivery.html privacy.html robots.txt sitemap.xml \
   "$WEB_DIR/"
@@ -80,6 +97,15 @@ rsync -av --delete public/images/ "$WEB_DIR/images/"
 
 rm -rf "$WEB_DIR/js" "$WEB_DIR/styles" "$WEB_DIR/data"
 rm -f "$WEB_DIR/main.js"
+
+echo ""
+echo "→ Проверка public_html после деплоя…"
+for f in index.html catalog.html order.html src/main.js src/js/app.js src/styles/main.css favicon.svg; do
+  if [[ ! -f "$WEB_DIR/$f" ]]; then
+    echo "ОШИБКА: после деплоя нет $WEB_DIR/$f"
+    exit 1
+  fi
+done
 
 echo ""
 echo "=== public_html ==="
