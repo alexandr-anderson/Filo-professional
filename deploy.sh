@@ -70,8 +70,9 @@ fi
 cd "$SOURCE_DIR"
 
 rsync -av --delete \
-  index.html catalog.html order.html about.html delivery.html privacy.html robots.txt sitemap.xml favicon.svg \
+  index.html catalog.html order.html about.html delivery.html privacy.html robots.txt sitemap.xml \
   "$WEB_DIR/"
+rsync -av public/favicon.svg "$WEB_DIR/favicon.svg"
 
 rsync -av --delete src "$WEB_DIR/"
 # Только images — не public/ целиком: --delete на корень удалил бы src/ и HTML
