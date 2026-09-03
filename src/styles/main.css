@@ -458,13 +458,17 @@ body.cookie-visible {
 }
 
 .glass-nav__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   font-family: var(--font-mono);
   font-size: clamp(0.64rem, 0.58rem + 0.15vw, 0.74rem);
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--charcoal-ink);
-  padding-block: 6px;
+  padding: 10px 8px;
   border-bottom: 1px solid transparent;
   white-space: nowrap;
 }
@@ -1589,7 +1593,11 @@ body.cookie-visible {
 }
 
 .shelf-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 44px;
   padding: 12px 16px;
   border: 1.5px solid var(--matte-black);
   background: transparent;
@@ -2804,7 +2812,8 @@ dialog > footer,
   .glass-nav__link {
     font-size: 0.58rem;
     letter-spacing: 0.04em;
-    padding: 6px 2px;
+    min-height: 44px;
+    padding: 10px 6px;
     white-space: nowrap;
     color: var(--charcoal-ink);
   }
