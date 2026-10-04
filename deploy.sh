@@ -85,6 +85,7 @@ require_path src/js/app.js
 require_path src/styles/main.css
 require_path public/favicon.svg
 require_path public/images/products/cafe-verde.webp
+require_path public/images/og-cover.jpg
 
 rsync -av --delete \
   index.html catalog.html order.html about.html delivery.html privacy.html robots.txt sitemap.xml \
